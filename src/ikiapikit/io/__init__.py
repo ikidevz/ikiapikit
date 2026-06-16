@@ -13,6 +13,9 @@ from .transform import (
 
 from .writers import (
     OutputWriter,
+    HAS_POLARS,
+    HAS_PANDAS,
+    HAS_ARROW,
     DuckDBWriter,
     get_writer,
     NdJsonWriter,
@@ -29,6 +32,9 @@ __all__ = [
     'flatten_records',
     'infer_schema_dataframe',
     'OutputWriter',
+    'HAS_POLARS',
+    'HAS_PANDAS',
+    'HAS_ARROW',
     'DuckDBWriter',
     'get_writer',
     'NdJsonWriter',

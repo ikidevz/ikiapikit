@@ -47,8 +47,8 @@ class TestIntegrationSyncFlow:
             call_count[0] += 1
             return httpx.Response(200, json=page1 if call_count[0] == 1 else page2)
 
-        with respx.mock(base_url=BASE_URL):
-            respx.get(f"{BASE_URL}/items").mock(side_effect=handler)
+        with respx.mock(base_url=BASE_URL) as mock:
+            mock.get("/items").mock(side_effect=handler)
             df = client.fetch_polars(
                 "/items", paginate=True, show_progress=False)
         assert isinstance(df, pl.DataFrame)
@@ -58,9 +58,9 @@ class TestIntegrationSyncFlow:
         cfg = make_config()
         client = Apikit.from_config(cfg)
         response = {"data": {"items": [{"id": 1}, {"id": 2}]}}
-        with respx.mock(base_url=BASE_URL):
-            respx.get(
-                f"{BASE_URL}/wrapped").mock(return_value=httpx.Response(200, json=response))
+        with respx.mock(base_url=BASE_URL) as mock:
+            mock.get(
+                "/wrapped").mock(return_value=httpx.Response(200, json=response))
             records = client.fetch_records(
                 "/wrapped", data_path="data.items", show_progress=False)
         assert len(records) == 2
@@ -68,10 +68,10 @@ class TestIntegrationSyncFlow:
     def test_post_then_delete_workflow(self):
         cfg = make_config()
         client = Apikit.from_config(cfg)
-        with respx.mock(base_url=BASE_URL):
-            respx.post(f"{BASE_URL}/items").mock(
+        with respx.mock(base_url=BASE_URL) as mock:
+            mock.post("/items").mock(
                 return_value=httpx.Response(201, json={"id": "new_1"}))
-            respx.delete(f"{BASE_URL}/items/new_1").mock(
+            mock.delete("/items/new_1").mock(
                 return_value=httpx.Response(200, json={"deleted": True}))
             created = client.post("/items", body={"name": "test"})
             deleted = client.delete(f"/items/{created['id']}")
@@ -90,10 +90,10 @@ class TestIntegrationAsyncFlow:
         cfg = make_config()
         client = Apikit.from_config(cfg)
 
-        with respx.mock(base_url=BASE_URL):
-            respx.get(f"{BASE_URL}/users").mock(
+        with respx.mock(base_url=BASE_URL) as mock:
+            mock.get("/users").mock(
                 return_value=httpx.Response(200, json=[{"id": 1}]))
-            respx.get(f"{BASE_URL}/orders").mock(
+            mock.get("/orders").mock(
                 return_value=httpx.Response(200, json=[{"id": 2}]))
 
             users, orders = await asyncio.gather(
@@ -108,9 +108,8 @@ class TestIntegrationAsyncFlow:
         cfg = make_config()
         client = Apikit.from_config(cfg)
         data = [{"id": i} for i in range(5)]
-        with respx.mock(base_url=BASE_URL):
-            respx.get(
-                f"{BASE_URL}/stream").mock(return_value=httpx.Response(200, json=data))
+        with respx.mock(base_url=BASE_URL) as mock:
+            mock.get("/stream").mock(return_value=httpx.Response(200, json=data))
             collected = [rec async for rec in client.astream("/stream", paginate=False)]
         assert len(collected) == 5
         assert [r["id"] for r in collected] == list(range(5))
@@ -127,24 +126,22 @@ class TestIntegrationFlatteningAndWriters:
         cfg = make_config()
         client = Apikit.from_config(cfg)
         data = [{"id": 1, "meta": {"score": 9.5, "tag": "A"}}]
-        with respx.mock(base_url=BASE_URL):
-            respx.get(
-                f"{BASE_URL}/data").mock(return_value=httpx.Response(200, json=data))
+        with respx.mock(base_url=BASE_URL) as mock:
+            mock.get("/data").mock(return_value=httpx.Response(200, json=data))
             path = client.fetch_to_file(
                 "/data", format="csv", file_path=tmp_dir / "out.csv")
         assert path.exists()
         content = path.read_text()
-        assert "meta__score" in content
-        assert "meta__tag" in content
+        assert "meta_score" in content
+        assert "meta_tag" in content
 
     def test_fetch_flatten_write_parquet(self, tmp_dir: Path):
         pytest.importorskip("polars")
         cfg = make_config()
         client = Apikit.from_config(cfg)
         data = [{"id": i, "nested": {"val": i * 2}} for i in range(3)]
-        with respx.mock(base_url=BASE_URL):
-            respx.get(
-                f"{BASE_URL}/data").mock(return_value=httpx.Response(200, json=data))
+        with respx.mock(base_url=BASE_URL) as mock:
+            mock.get("/data").mock(return_value=httpx.Response(200, json=data))
             path = client.fetch_to_file(
                 "/data", format="parquet", file_path=tmp_dir / "out.parquet")
         assert path.exists()

@@ -54,7 +54,7 @@ try:
     completed_pct = df["completed"].mean() * 100
     print(f"  % completed   : {completed_pct:.0f}%")
     print(
-        f"  Sample:\n{df[['id', 'title', 'completed']].head(3).to_string(index=False)}")
+        f"  Sample:\n{df[['id', 'title', 'completed']].head(3)}")
 except ImportError:
     print("  (pandas not installed — run: pip install pandas)")
 
@@ -63,7 +63,7 @@ print("\n▶ Nested JSON flattening — /users (has nested address/company objec
 try:
     import polars as pl
     df = client.fetch_polars("/users", flatten=True, show_progress=False)
-    nested_cols = [c for c in df.columns if "__" in c]
+    nested_cols = [c for c in df.columns if "_" in c]
     print(f"  Flattened columns ({len(nested_cols)} nested):")
     for col in nested_cols[:8]:
         print(f"    {col}")

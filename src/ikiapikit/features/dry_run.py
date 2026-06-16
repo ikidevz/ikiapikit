@@ -67,5 +67,5 @@ class DryRunResult:
             "pagination_strategy": self.pagination_strategy,
             "page_size": self.page_size,
             "output_format": self.output_format,
-            "output_path": str(self.output_path) if self.output_path else None,
+            "output_path": self.output_path.as_posix() if self.output_path else None,
         }

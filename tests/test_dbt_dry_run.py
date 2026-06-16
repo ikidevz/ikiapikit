@@ -85,9 +85,9 @@ class TestDbtExporter:
         cfg = make_config()
         client = Apikit.from_config(cfg)
         data = [{"id": i, "value": i * 10} for i in range(3)]
-        with respx.mock(base_url=BASE_URL):
-            respx.get(
-                f"{BASE_URL}/data").mock(return_value=httpx.Response(200, json=data))
+        with respx.mock(base_url=BASE_URL) as mock:
+            mock.get("/data").mock(
+                return_value=httpx.Response(200, json=data))
             exporter = DbtExporter(output_dir=tmp_dir / "dbt")
             paths = exporter.export_from_client(
                 client, "/data", "my_data",
@@ -135,7 +135,8 @@ class TestDryRunResult:
     def test_output_path_serialized_as_string(self):
         result = self._make_result(
             output_format="parquet", output_path=Path("/tmp/out.parquet"))
-        assert result.to_dict()["output_path"] == "/tmp/out.parquet"
+        assert result.to_dict()["output_path"] == Path(
+            "/tmp/out.parquet").as_posix()
 
     def test_output_path_none_when_not_set(self):
         result = self._make_result()

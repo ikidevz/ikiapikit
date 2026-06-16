@@ -16,20 +16,23 @@ class CsvWriter(OutputWriter):
     """CSV via Polars (preferred) or Pandas."""
 
     def write(self, records: list[dict], dest: Union[str, Path, io.IOBase]) -> None:
-        if HAS_POLARS:
+        try:
+            import polars as pl
             df = pl.DataFrame(flatten_records(records))
             if isinstance(dest, (str, Path)):
                 df.write_csv(str(dest))
             else:
                 dest.write(df.write_csv().encode())
-        elif HAS_PANDAS:
-            df = pd.DataFrame(flatten_records(records))
-            if isinstance(dest, (str, Path)):
-                df.to_csv(str(dest), index=False)
-            else:
-                dest.write(df.to_csv(index=False).encode())
-        else:
-            raise OutputError("CSV output requires polars or pandas.")
+        except ImportError:
+            try:
+                import pandas as pd
+                df = pd.DataFrame(flatten_records(records))
+                if isinstance(dest, (str, Path)):
+                    df.to_csv(str(dest), index=False)
+                else:
+                    dest.write(df.to_csv(index=False).encode())
+            except ImportError:
+                raise OutputError("CSV output requires polars or pandas.")
 
 
 class ParquetWriter(OutputWriter):

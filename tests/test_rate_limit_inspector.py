@@ -103,8 +103,8 @@ class TestApiInspector:
         cfg = make_config()
         inspector = ApiInspector(cfg)
         body = {"items": [{"id": 1}], "next_cursor": "abc"}
-        with respx.mock(base_url=BASE_URL):
-            respx.get(f"{BASE_URL}/probe").mock(
+        with respx.mock(base_url=BASE_URL) as mock:
+            mock.get("/probe").mock(
                 return_value=httpx.Response(
                     200, json=body,
                     headers={"Content-Type": "application/json"},
@@ -122,8 +122,8 @@ class TestApiInspector:
         cfg = make_config()
         inspector = ApiInspector(cfg)
         body = [{"id": 1}, {"id": 2}]
-        with respx.mock(base_url=BASE_URL):
-            respx.get(f"{BASE_URL}/async-probe").mock(
+        with respx.mock(base_url=BASE_URL) as mock:
+            mock.get("/async-probe").mock(
                 return_value=httpx.Response(200, json=body))
             result = await inspector.inspect_async("/async-probe")
         assert result.record_count == 2
@@ -162,8 +162,8 @@ class TestApiInspector:
         cfg = make_config()
         inspector = ApiInspector(cfg)
         body = {"items": [{"id": 1}]}
-        with respx.mock(base_url=BASE_URL):
-            respx.get(f"{BASE_URL}/config-probe").mock(
+        with respx.mock(base_url=BASE_URL) as mock:
+            mock.get("/config-probe").mock(
                 return_value=httpx.Response(200, json=body))
             result = inspector.inspect_sync("/config-probe")
         config_str = result.suggested_config()
@@ -174,8 +174,8 @@ class TestApiInspector:
         cfg = make_config()
         inspector = ApiInspector(cfg)
         body = [{"id": 1, "name": "Alice", "score": 9.5}]
-        with respx.mock(base_url=BASE_URL):
-            respx.get(f"{BASE_URL}/schema-probe").mock(
+        with respx.mock(base_url=BASE_URL) as mock:
+            mock.get("/schema-probe").mock(
                 return_value=httpx.Response(200, json=body))
             result = inspector.inspect_sync("/schema-probe")
         schema = result.schema_sample()
@@ -186,17 +186,16 @@ class TestApiInspector:
 class TestApikitInspect:
     def test_inspect_via_facade(self, client: Apikit):
         body = [{"id": 1}]
-        with respx.mock(base_url=BASE_URL):
-            respx.get(
-                f"{BASE_URL}/probe").mock(return_value=httpx.Response(200, json=body))
+        with respx.mock(base_url=BASE_URL) as mock:
+            mock.get("/probe").mock(return_value=httpx.Response(200, json=body))
             result = client.inspect("/probe")
         assert isinstance(result, InspectorResult)
 
     @pytest.mark.asyncio
     async def test_ainspect_via_facade(self, client: Apikit):
         body = [{"id": 2}]
-        with respx.mock(base_url=BASE_URL):
-            respx.get(f"{BASE_URL}/async-probe").mock(
+        with respx.mock(base_url=BASE_URL) as mock:
+            mock.get("/async-probe").mock(
                 return_value=httpx.Response(200, json=body))
             result = await client.ainspect("/async-probe")
         assert isinstance(result, InspectorResult)

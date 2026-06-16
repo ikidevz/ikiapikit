@@ -77,7 +77,7 @@ users = client.fetch_records("/users", show_progress=False)
 flat_users = _flatten_records(users)
 print(f"  Original keys   : {list(users[0].keys())}")
 print(f"  Flattened keys  : {list(flat_users[0].keys())}")
-nested_keys = [k for k in flat_users[0] if "__" in k]
+nested_keys = [k for k in flat_users[0] if "_" in k]
 print(f"  Nested columns  : {nested_keys}")
 
 # ── 5. records_to_polars ──────────────────────────────────────────────────────

@@ -66,16 +66,12 @@ class TestCsvWriter:
         assert path.stat().st_size > 0
 
     def test_raises_output_error_without_backends(self, tmp_dir: Path, records: list[dict]):
-        orig_polars = HAS_POLARS
-        orig_pandas = HAS_PANDAS
-        try:
-            HAS_POLARS = False
-            HAS_PANDAS = False
+        import sys
+        from unittest.mock import patch
+
+        with patch.dict(sys.modules, {"polars": None, "pandas": None}):
             with pytest.raises(OutputError, match="polars or pandas"):
                 CsvWriter().write(records, tmp_dir / "out.csv")
-        finally:
-            HAS_POLARS = orig_polars
-            HAS_PANDAS = orig_pandas
 
 
 class TestParquetWriter:

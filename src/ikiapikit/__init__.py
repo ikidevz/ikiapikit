@@ -93,7 +93,10 @@ from .io import (
     JsonWriter,
     CsvWriter,
     ParquetWriter,
-    ArrowWriter
+    ArrowWriter,
+    HAS_POLARS,
+    HAS_PANDAS,
+    HAS_ARROW,
 )
 
 from .facade import Apikit
@@ -188,6 +191,9 @@ __all__ = [
     'apply_rename',
     'apply_transform',
     'apply_field_ops',
+    'HAS_POLARS',
+    'HAS_PANDAS',
+    'HAS_ARROW',
     'Apikit',
     "__version__"
 ]

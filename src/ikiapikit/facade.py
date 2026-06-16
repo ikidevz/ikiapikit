@@ -462,9 +462,10 @@ class Apikit:
         records = self.fetch_records(
             endpoint, params=params, paginate=paginate, strategy=strategy,
             page_size=page_size, data_path=data_path, show_progress=show_progress,
-            flatten=False,  # we handle flatten below for polars
+            flatten=flatten,
             select=select, exclude=exclude, rename=rename,
         )
+
         if isinstance(records, ValidationResult):
             records = records.valid_dicts()
         return records_to_polars(records) if flatten else _pl().DataFrame(records)
@@ -489,7 +490,7 @@ class Apikit:
         records = self.fetch_records(
             endpoint, params=params, paginate=paginate, strategy=strategy,
             page_size=page_size, data_path=data_path, show_progress=show_progress,
-            flatten=False,
+            flatten=flatten,
             select=select, exclude=exclude, rename=rename,
         )
         if isinstance(records, ValidationResult):

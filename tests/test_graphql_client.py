@@ -19,8 +19,8 @@ class TestGraphQLClient:
         cfg = make_config()
         gql = GraphQLClient(cfg, "/graphql")
         response_body = {"data": {"users": [{"id": 1, "name": "Alice"}]}}
-        with respx.mock(base_url=BASE_URL):
-            respx.post(f"{BASE_URL}/graphql").mock(
+        with respx.mock(base_url=BASE_URL) as mock:
+            mock.post("/graphql").mock(
                 return_value=httpx.Response(200, json=response_body))
             result = gql.query_sync(GQL_QUERY)
         assert result == {"users": [{"id": 1, "name": "Alice"}]}
@@ -29,8 +29,8 @@ class TestGraphQLClient:
         cfg = make_config()
         gql = GraphQLClient(cfg, "/graphql")
         error_body = {"errors": [{"message": "Field not found"}]}
-        with respx.mock(base_url=BASE_URL):
-            respx.post(f"{BASE_URL}/graphql").mock(
+        with respx.mock(base_url=BASE_URL) as mock:
+            mock.post("/graphql").mock(
                 return_value=httpx.Response(200, json=error_body))
             with pytest.raises(GraphQLError) as exc_info:
                 gql.query_sync(GQL_QUERY)
@@ -41,8 +41,8 @@ class TestGraphQLClient:
         cfg = make_config()
         gql = GraphQLClient(cfg, "/graphql")
         response_body = {"data": {"orders": [{"id": 99}]}}
-        with respx.mock(base_url=BASE_URL):
-            respx.post(f"{BASE_URL}/graphql").mock(
+        with respx.mock(base_url=BASE_URL) as mock:
+            mock.post("/graphql").mock(
                 return_value=httpx.Response(200, json=response_body))
             result = await gql.query_async(GQL_QUERY)
         assert result == {"orders": [{"id": 99}]}
@@ -74,8 +74,8 @@ class TestGraphQLClient:
             idx[0] += 1
             return httpx.Response(200, json=resp)
 
-        with respx.mock(base_url=BASE_URL):
-            respx.post(f"{BASE_URL}/graphql").mock(side_effect=handler)
+        with respx.mock(base_url=BASE_URL) as mock:
+            mock.post("/graphql").mock(side_effect=handler)
             nodes = gql.paginate_sync(GQL_QUERY, connection_path="items")
         assert [n["id"] for n in nodes] == [1, 2, 3]
 
@@ -90,8 +90,8 @@ class TestGraphQLClient:
                 }
             }
         }
-        with respx.mock(base_url=BASE_URL):
-            respx.post(f"{BASE_URL}/graphql").mock(
+        with respx.mock(base_url=BASE_URL) as mock:
+            mock.post("/graphql").mock(
                 return_value=httpx.Response(200, json=page))
             nodes = gql.paginate_sync(GQL_QUERY, connection_path="connection")
         assert [n["id"] for n in nodes] == [10, 20]

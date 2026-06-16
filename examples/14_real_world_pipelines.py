@@ -230,7 +230,7 @@ def pipeline_d():
     print(f"  DataFrame shape: {df.shape}")
 
     # Step 4: select only the top-level (non-nested) columns
-    top_level = [c for c in df.columns if "__" not in c]
+    top_level = [c for c in df.columns if "_" not in c]
     print(f"  Top-level cols : {top_level}")
     print(f"  Sample:\n{df.select(top_level).head(3)}")
 

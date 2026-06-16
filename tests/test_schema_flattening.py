@@ -5,6 +5,7 @@ tests/test_schema_flattening.py  —  §9  JSON flattening & schema inference.
 from __future__ import annotations
 
 import pytest
+import sys
 
 from ikiapikit import (
     flatten_dict,
@@ -13,6 +14,8 @@ from ikiapikit import (
     records_to_pandas,
     infer_schema_dataframe
 )
+
+from unittest.mock import patch
 
 
 class TestFlattenDict:
@@ -23,11 +26,11 @@ class TestFlattenDict:
     def test_nested_one_level(self):
         d = {"user": {"name": "Alice", "age": 30}}
         flat = flatten_dict(d)
-        assert flat == {"user__name": "Alice", "user__age": 30}
+        assert flat == {"user_name": "Alice", "user_age": 30}
 
     def test_nested_multi_level(self):
         d = {"a": {"b": {"c": 42}}}
-        assert flatten_dict(d) == {"a__b__c": 42}
+        assert flatten_dict(d) == {"a_b_c": 42}
 
     def test_list_values_serialized_as_json(self):
         d = {"tags": ["x", "y"]}
@@ -46,8 +49,8 @@ class TestFlattenDict:
 class TestFlattenRecords:
     def test_list_of_dicts(self, nested_record: dict):
         flat = flatten_records([nested_record])
-        assert flat[0]["user__name"] == "Alice"
-        assert flat[0]["user__address__city"] == "NYC"
+        assert flat[0]["user_name"] == "Alice"
+        assert flat[0]["user_address_city"] == "NYC"
 
     def test_non_dict_wrapped_in_value(self):
         result = flatten_records([42, "hello"])
@@ -71,17 +74,15 @@ class TestRecordsToPolars:
     def test_flattens_nested(self, nested_record: dict):
         pl = pytest.importorskip("polars")
         df = records_to_polars([nested_record])
-        assert "user__name" in df.columns
-        assert "user__address__city" in df.columns
+        assert "user_name" in df.columns
+        assert "user_address_city" in df.columns
 
     def test_raises_without_polars(self, records: list[dict]):
-        orig = HAS_POLARS
-        try:
-            HAS_POLARS = False
+        import ikiapikit
+        with patch.dict(sys.modules, {"polars": None}), \
+                patch.object(ikiapikit, "pl", None, create=True):
             with pytest.raises(ImportError, match="polars"):
                 records_to_polars(records)
-        finally:
-            HAS_POLARS = orig
 
 
 class TestRecordsToPandas:
@@ -103,9 +104,5 @@ class TestInferPolarsSchema:
         assert infer_schema_dataframe([], 'polars') is None
 
     def test_returns_none_without_polars(self, records: list[dict]):
-        orig = HAS_POLARS
-        try:
-            HAS_POLARS = False
+        with patch.dict(sys.modules, {"polars": None}):
             assert infer_schema_dataframe(records, 'polars') is None
-        finally:
-            HAS_POLARS = orig

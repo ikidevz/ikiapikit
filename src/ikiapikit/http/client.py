@@ -103,9 +103,20 @@ class RestClient:
         def _do() -> tuple:
             with self._sync_client() as client:
                 req = client.build_request(
-                    method, url, params=params, json=json_body, headers=headers)
+                    method,
+                    url,
+                    params=params,
+                    json=json_body,
+                    headers=headers,
+                )
                 req = self._apply_auth_sync(req)
-                resp = client.send(req)
+                resp = client.request(
+                    method=req.method,
+                    url=req.url,
+                    headers=req.headers,
+                    content=req.content,
+                    params=params,
+                )
 
                 if resp.status_code == 429:
                     retry_after = float(resp.headers.get("Retry-After", 5))
@@ -199,9 +210,20 @@ class RestClient:
             attempt += 1
             async with self._async_client() as client:
                 req = client.build_request(
-                    method, url, params=params, json=json_body, headers=headers)
-                req = await self.auth.apply_async(req)
-                resp = await client.send(req)
+                    method,
+                    url,
+                    params=params,
+                    json=json_body,
+                    headers=headers,
+                )
+                req = self._apply_auth_sync(req)
+                resp = await client.request(
+                    method=req.method,
+                    url=req.url,
+                    headers=req.headers,
+                    content=req.content,
+                    params=params,
+                )
 
             if resp.status_code == 429:
                 retry_after = float(resp.headers.get("Retry-After", 5))
@@ -241,9 +263,20 @@ class RestClient:
             attempt += 1
             async with self._async_client() as client:
                 req = client.build_request(
-                    method, url, params=params, json=json_body, headers=headers)
-                req = await self.auth.apply_async(req)
-                resp = await client.send(req)
+                    method,
+                    url,
+                    params=params,
+                    json=json_body,
+                    headers=headers,
+                )
+                req = self._apply_auth_sync(req)
+                resp = await client.request(
+                    method=req.method,
+                    url=req.url,
+                    headers=req.headers,
+                    content=req.content,
+                    params=params,
+                )
             if resp.status_code == 429:
                 retry_after = float(resp.headers.get("Retry-After", 5))
                 logger.warning("Rate limited — sleeping %ss", retry_after)

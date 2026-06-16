@@ -8,7 +8,7 @@ def flatten_dict(d: dict, parent_key: str = "", sep: str = "_") -> dict:
 
     Example:
         {"user": {"id": 1, "name": "Alice"}} →
-        {"user__id": 1, "user__name": "Alice"}
+        {"user_id": 1, "user_name": "Alice"}
     """
     items: list[tuple[str, Any]] = []
     for k, v in d.items():
