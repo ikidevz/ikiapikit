@@ -17,7 +17,7 @@ Run:
 
 import asyncio
 import time
-from iki_apikit import Apikit
+from ikiapikit import Apikit
 
 BASE = "https://jsonplaceholder.typicode.com"
 
@@ -77,7 +77,7 @@ async def demo_async_dataframes():
 # ── 4. Async streaming ────────────────────────────────────────────────────────
 async def demo_streaming():
     print("\n▶ astream()  — yield records one at a time")
-    from iki_apikit import ApiConfig, AuthConfig, PaginationConfig
+    from ikiapikit import ApiConfig, AuthConfig, PaginationConfig
 
     cfg = ApiConfig(
         base_url=BASE,
@@ -106,7 +106,7 @@ async def demo_streaming():
 # ── 5. Early exit from stream ─────────────────────────────────────────────────
 async def demo_early_exit():
     print("\n▶ astream() with early exit  — stop as soon as condition is met")
-    from iki_apikit import ApiConfig, AuthConfig, PaginationConfig
+    from ikiapikit import ApiConfig, AuthConfig, PaginationConfig
 
     cfg = ApiConfig(
         base_url=BASE,
@@ -141,7 +141,7 @@ async def demo_async_file():
     print("\n▶ afetch_to_file()  — async fetch then write to disk")
     import tempfile
     import os
-    from iki_apikit import ApiConfig, AuthConfig, PaginationConfig
+    from ikiapikit import ApiConfig, AuthConfig, PaginationConfig
 
     cfg = ApiConfig(
         base_url=BASE,

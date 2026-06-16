@@ -14,7 +14,7 @@ Run:
     python 01_quick_start.py
 """
 
-from iki_apikit import Apikit
+from ikiapikit import Apikit
 
 # ── 1. Create a client ────────────────────────────────────────────────────────
 client = Apikit(base_url="https://jsonplaceholder.typicode.com", auth="none")

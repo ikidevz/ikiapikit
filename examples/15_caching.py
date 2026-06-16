@@ -194,7 +194,7 @@ print("""
 print("\n▶ backend='disk'  — cache survives across Python processes")
 print("""
   import tempfile, os
-  from iki_apikit import Apikit, CacheConfig
+  from ikiapikit import Apikit, CacheConfig
 
   cache_dir = os.path.expanduser("~/.cache/apikit")
   client = Apikit(
@@ -221,7 +221,7 @@ print("""
 print("\n▶ Async fetch + cache — works identically with afetch_records()")
 print("""
   import asyncio
-  from iki_apikit import Apikit
+  from ikiapikit import Apikit
 
   client = Apikit(base_url=BASE, auth="none", cache=True)
 

@@ -8,8 +8,8 @@ import pytest
 import httpx
 import respx
 
-from kit import GraphQLClient, GraphQLError
-from tests.conftest import make_config, BASE_URL
+from ikiapikit import GraphQLClient, GraphQLError
+from .conftest import make_config, BASE_URL
 
 GQL_QUERY = "query { users { id name } }"
 

@@ -17,7 +17,7 @@ Run:
 """
 
 import json
-from iki_apikit import (
+from ikiapikit import (
     Apikit,
     _flatten_dict,
     _flatten_records,
@@ -96,7 +96,7 @@ except ImportError:
 print("\n▶ records_to_pandas()  — auto-flatten + Pandas DataFrame")
 try:
     import pandas as pd
-    from iki_apikit import records_to_pandas
+    from ikiapikit import records_to_pandas
     df = records_to_pandas(users)
     print(f"  Shape  : {df.shape}")
     print(f"  dtypes sample:")
@@ -118,7 +118,7 @@ except ImportError:
 
 print("\n▶ infer_pandas_schema()  — detect Pandas dtypes")
 try:
-    from iki_apikit.io.transform.schema import infer_pandas_schema
+    from ikiapikit.io.transform.schema import infer_pandas_schema
     schema = infer_pandas_schema(users)
     if schema:
         for col, dtype in list(schema.items())[:6]:
@@ -126,7 +126,7 @@ try:
 except (ImportError, ModuleNotFoundError):
     # Fallback: use records_to_pandas and .dtypes
     try:
-        from iki_apikit import records_to_pandas
+        from ikiapikit import records_to_pandas
         df = records_to_pandas(users)
         for col, dtype in list(df.dtypes.items())[:6]:
             print(f"    {col:<40} {dtype}")

@@ -6,9 +6,9 @@ from __future__ import annotations
 
 import pytest
 
-from kit import (
-    _flatten_dict,
-    _flatten_records,
+from ikiapikit import (
+    flatten_dict,
+    flatten_records,
     records_to_polars,
     records_to_pandas,
     infer_polars_schema,
@@ -18,44 +18,47 @@ from kit import (
 class TestFlattenDict:
     def test_flat_dict_unchanged(self):
         d = {"a": 1, "b": "hello"}
-        assert _flatten_dict(d) == d
+        assert flatten_dict(d) == d
 
     def test_nested_one_level(self):
         d = {"user": {"name": "Alice", "age": 30}}
-        flat = _flatten_dict(d)
+        flat = flatten_dict(d)
         assert flat == {"user__name": "Alice", "user__age": 30}
 
     def test_nested_multi_level(self):
         d = {"a": {"b": {"c": 42}}}
-        assert _flatten_dict(d) == {"a__b__c": 42}
+        assert flatten_dict(d) == {"a__b__c": 42}
 
     def test_list_values_serialized_as_json(self):
         d = {"tags": ["x", "y"]}
-        flat = _flatten_dict(d)
+        flat = flatten_dict(d)
         assert flat["tags"] == '["x","y"]'
 
     def test_custom_separator(self):
         d = {"a": {"b": 1}}
-        flat = _flatten_dict(d, sep=".")
+        flat = flatten_dict(d, sep=".")
         assert "a.b" in flat
 
     def test_empty_dict(self):
-        assert _flatten_dict({}) == {}
+        assert flatten_dict({}) == {}
 
 
 class TestFlattenRecords:
     def test_list_of_dicts(self, nested_record: dict):
-        flat = _flatten_records([nested_record])
+        flat = flatten_records([nested_record])
         assert flat[0]["user__name"] == "Alice"
         assert flat[0]["user__address__city"] == "NYC"
 
     def test_non_dict_wrapped_in_value(self):
-        result = _flatten_records([42, "hello"])
+        result = flatten_records([42, "hello"])
         assert result[0] == {"value": 42}
         assert result[1] == {"value": "hello"}
 
     def test_empty_list(self):
-        assert _flatten_records([]) == []
+        assert flatten_records([]) == []
+
+
+HAS_POLARS = True
 
 
 class TestRecordsToPolars:
@@ -72,14 +75,13 @@ class TestRecordsToPolars:
         assert "user__address__city" in df.columns
 
     def test_raises_without_polars(self, records: list[dict]):
-        import kit as _kit
-        orig = _kit._HAS_POLARS
+        orig = HAS_POLARS
         try:
-            _kit._HAS_POLARS = False
+            HAS_POLARS = False
             with pytest.raises(ImportError, match="polars"):
                 records_to_polars(records)
         finally:
-            _kit._HAS_POLARS = orig
+            HAS_POLARS = orig
 
 
 class TestRecordsToPandas:
@@ -101,10 +103,9 @@ class TestInferPolarsSchema:
         assert infer_polars_schema([]) is None
 
     def test_returns_none_without_polars(self, records: list[dict]):
-        import kit as _kit
-        orig = _kit._HAS_POLARS
+        orig = HAS_POLARS
         try:
-            _kit._HAS_POLARS = False
+            HAS_POLARS = False
             assert infer_polars_schema(records) is None
         finally:
-            _kit._HAS_POLARS = orig
+            HAS_POLARS = orig

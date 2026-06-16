@@ -28,7 +28,7 @@ import asyncio
 import tempfile
 from pathlib import Path
 
-from iki_apikit import (
+from ikiapikit import (
     Apikit,
     ApiConfig,
     AuthConfig,

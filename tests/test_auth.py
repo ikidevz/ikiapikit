@@ -8,7 +8,7 @@ import pytest
 import httpx
 import respx
 
-from kit import (
+from ikiapikit import (
     AuthConfig,
     NoAuth,
     BearerAuth,
@@ -76,12 +76,14 @@ class TestBasicAuth:
 
 class TestOAuth2ClientCredentials:
     def test_is_expired_before_fetch(self):
-        auth = OAuth2ClientCredentials("id", "secret", "https://auth.example.com/token")
+        auth = OAuth2ClientCredentials(
+            "id", "secret", "https://auth.example.com/token")
         assert auth._is_expired() is True
 
     @pytest.mark.asyncio
     async def test_fetches_token_on_first_request(self):
-        auth = OAuth2ClientCredentials("id", "secret", "https://auth.example.com/token")
+        auth = OAuth2ClientCredentials(
+            "id", "secret", "https://auth.example.com/token")
         mock_token_response = {"access_token": "tok123", "expires_in": 3600}
 
         with respx.mock:
@@ -93,8 +95,10 @@ class TestOAuth2ClientCredentials:
             assert result.headers["Authorization"] == "Bearer tok123"
 
     def test_refresh_sync_updates_token(self):
-        auth = OAuth2ClientCredentials("id", "secret", "https://auth.example.com/token")
-        mock_token_response = {"access_token": "refreshed_tok", "expires_in": 3600}
+        auth = OAuth2ClientCredentials(
+            "id", "secret", "https://auth.example.com/token")
+        mock_token_response = {
+            "access_token": "refreshed_tok", "expires_in": 3600}
 
         with respx.mock:
             respx.post("https://auth.example.com/token").mock(

@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import pytest
 
-from kit import (
+from ikiapikit import (
     ApiConfig,
     AuthConfig,
     RetryConfig,
@@ -57,11 +57,13 @@ class TestAuthConfig:
         assert cfg.token.get_secret_value() == "tok"
 
     def test_apikey_with_header(self):
-        cfg = AuthConfig(type="apikey", api_key="mykey", api_key_header="X-Custom")
+        cfg = AuthConfig(type="apikey", api_key="mykey",
+                         api_key_header="X-Custom")
         assert cfg.api_key_header == "X-Custom"
 
     def test_apikey_with_query_param(self):
-        cfg = AuthConfig(type="apikey", api_key="mykey", api_key_query_param="key")
+        cfg = AuthConfig(type="apikey", api_key="mykey",
+                         api_key_query_param="key")
         assert cfg.api_key_query_param == "key"
 
     def test_basic_valid(self):

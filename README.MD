@@ -982,25 +982,10 @@ apikit is built around five design patterns that keep it extensible without modi
 ## Testing
 
 ```bash
-# Install with dev dependencies
-pip install -e ".[dev]"
 
 # Run all tests
 pytest
 
-# With coverage report
-pytest --cov=apikit --cov-report=term-missing
-
-# Run a specific layer
-pytest tests/http/ -v
-pytest tests/features/webhook/ -v
-pytest tests/integration/ -v
-
-# Run a single test file
-pytest tests/test_auth.py -v
-
-# Skip optional-dependency tests
-pytest -k "not duckdb"
 ```
 
 **Test layout:**
@@ -1018,14 +1003,10 @@ tests/
 ├── test_apikit_facade.py            # §12  Apikit facade
 ├── test_rate_limit_inspector.py     # §13 & §14  RateLimitState + ApiInspector
 ├── test_dbt_dry_run.py              # §16 & §17  DbtExporter + DryRunResult
-├── http/
-│   ├── test_rest_client.py          # §6  RestClient (sync + async)
-│   └── test_graphql_client.py       # §7  GraphQL client
-├── features/
-│   └── webhook/
-│       └── test_webhook.py          # §15  webhook validators & receiver
-└── integration/
-    └── test_full_flows.py           # end-to-end flows
+├── test_rest_client.py              # §6  RestClient (sync + async)
+├── test_graphql_client.py           # §7  GraphQL client
+├── test_webhook.py                  # §15  webhook validators & receiver
+├── test_full_flows.py               # end-to-end flows
 ```
 
 ---

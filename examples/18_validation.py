@@ -28,7 +28,7 @@ Run:
 
 from typing import Optional
 from pydantic import BaseModel, EmailStr, Field, field_validator
-from iki_apikit import Apikit
+from ikiapikit import Apikit
 
 print("=" * 60)
 print("18 · RECORD-LEVEL PYDANTIC VALIDATION")

@@ -20,7 +20,7 @@ from typing import Any
 import httpx
 import pytest
 
-from kit import (
+from ikiapikit import (
     Apikit,
     ApiConfig,
     AuthConfig,
@@ -46,7 +46,8 @@ def make_config(
 ) -> ApiConfig:
     return ApiConfig(
         base_url=base_url,
-        auth=AuthConfig(type=auth_type, token=token if auth_type == "bearer" else None),
+        auth=AuthConfig(
+            type=auth_type, token=token if auth_type == "bearer" else None),
         pagination=PaginationConfig(strategy=strategy, page_size=page_size),
         retry=RetryConfig(max_attempts=2, min_wait=0.0, max_wait=0.1),
     )

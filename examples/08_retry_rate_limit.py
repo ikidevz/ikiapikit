@@ -14,11 +14,11 @@ Run:
     python 08_retry_rate_limit.py
 """
 
-from iki_apikit import AuthError
-from iki_apikit import RetryConfig
+from ikiapikit import AuthError
+from ikiapikit import RetryConfig
 import time
 import httpx
-from iki_apikit import Apikit, ApiConfig, AuthConfig, RetryConfig, RateLimitState
+from ikiapikit import Apikit, ApiConfig, AuthConfig, RetryConfig, RateLimitState
 
 print("=" * 60)
 print("08 · RETRY & RATE LIMIT HANDLING")

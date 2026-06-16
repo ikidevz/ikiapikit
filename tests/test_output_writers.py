@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-from kit import (
+from ikiapikit import (
     NdJsonWriter,
     JsonWriter,
     CsvWriter,
@@ -19,6 +19,9 @@ from kit import (
     get_writer,
     OutputError,
 )
+
+HAS_POLARS = True
+HAS_PANDAS = True
 
 
 class TestNdJsonWriter:
@@ -63,17 +66,16 @@ class TestCsvWriter:
         assert path.stat().st_size > 0
 
     def test_raises_output_error_without_backends(self, tmp_dir: Path, records: list[dict]):
-        import kit as _kit
-        orig_polars = _kit._HAS_POLARS
-        orig_pandas = _kit._HAS_PANDAS
+        orig_polars = HAS_POLARS
+        orig_pandas = HAS_PANDAS
         try:
-            _kit._HAS_POLARS = False
-            _kit._HAS_PANDAS = False
+            HAS_POLARS = False
+            HAS_PANDAS = False
             with pytest.raises(OutputError, match="polars or pandas"):
                 CsvWriter().write(records, tmp_dir / "out.csv")
         finally:
-            _kit._HAS_POLARS = orig_polars
-            _kit._HAS_PANDAS = orig_pandas
+            HAS_POLARS = orig_polars
+            HAS_PANDAS = orig_pandas
 
 
 class TestParquetWriter:

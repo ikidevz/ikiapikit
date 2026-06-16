@@ -13,7 +13,7 @@ import httpx
 import pytest
 import respx
 
-from kit import (
+from ikiapikit import (
     Apikit,
     ApiConfig,
     AuthConfig,
@@ -22,7 +22,7 @@ from kit import (
     ConnectorNotFoundError,
     DryRunResult,
 )
-from tests.conftest import make_config, BASE_URL
+from .conftest import make_config, BASE_URL
 
 
 # ============================================================================
@@ -41,7 +41,8 @@ class TestApikitConstructors:
 
     def test_from_name_unknown_raises(self, tmp_dir: Path):
         with patch("kit.ConfigManager") as mock_mgr:
-            mock_mgr.return_value.get_api_config.side_effect = ConnectorNotFoundError("nope")
+            mock_mgr.return_value.get_api_config.side_effect = ConnectorNotFoundError(
+                "nope")
             with pytest.raises(ConnectorNotFoundError):
                 Apikit.from_name("totally_unknown_api_xyz")
 
@@ -74,12 +75,14 @@ class TestApikitFetchRecords:
     def test_fetch_records_sync(self, client: Apikit):
         data = [{"id": 1}, {"id": 2}]
         with respx.mock(base_url=BASE_URL):
-            respx.get(f"{BASE_URL}/items").mock(return_value=httpx.Response(200, json=data))
+            respx.get(
+                f"{BASE_URL}/items").mock(return_value=httpx.Response(200, json=data))
             records = client.fetch_records("/items", show_progress=False)
         assert records == data
 
     def test_fetch_records_dry_run_returns_dry_run_result(self, client: Apikit):
-        result = client.fetch_records("/users", dry_run=True, show_progress=False)
+        result = client.fetch_records(
+            "/users", dry_run=True, show_progress=False)
         assert isinstance(result, DryRunResult)
         assert result.method == "GET"
         assert "/users" in result.url
@@ -87,7 +90,8 @@ class TestApikitFetchRecords:
     def test_fetch_records_with_params(self, client: Apikit):
         with respx.mock(base_url=BASE_URL) as mock:
             mock.get("/items").mock(return_value=httpx.Response(200, json=[]))
-            client.fetch_records("/items", params={"status": "active"}, show_progress=False)
+            client.fetch_records(
+                "/items", params={"status": "active"}, show_progress=False)
             assert "status=active" in str(mock.calls[0].request.url)
 
     @pytest.mark.asyncio
@@ -110,7 +114,8 @@ class TestApikitDataFrameMethods:
         pl = pytest.importorskip("polars")
         data = [{"id": 1, "name": "Alice"}, {"id": 2, "name": "Bob"}]
         with respx.mock(base_url=BASE_URL):
-            respx.get(f"{BASE_URL}/users").mock(return_value=httpx.Response(200, json=data))
+            respx.get(
+                f"{BASE_URL}/users").mock(return_value=httpx.Response(200, json=data))
             df = client.fetch_polars("/users", show_progress=False)
         assert isinstance(df, pl.DataFrame)
         assert len(df) == 2
@@ -119,7 +124,8 @@ class TestApikitDataFrameMethods:
         pd = pytest.importorskip("pandas")
         data = [{"id": 1}, {"id": 2}]
         with respx.mock(base_url=BASE_URL):
-            respx.get(f"{BASE_URL}/items").mock(return_value=httpx.Response(200, json=data))
+            respx.get(
+                f"{BASE_URL}/items").mock(return_value=httpx.Response(200, json=data))
             df = client.fetch_pandas("/items", show_progress=False)
         assert hasattr(df, "columns")
         assert len(df) == 2
@@ -152,7 +158,8 @@ class TestApikitMutations:
         with respx.mock(base_url=BASE_URL):
             respx.put(f"{BASE_URL}/contacts/ct_1").mock(
                 return_value=httpx.Response(200, json={"updated": True}))
-            result = client.put("/contacts/ct_1", body={"name": "Alice Updated"})
+            result = client.put(
+                "/contacts/ct_1", body={"name": "Alice Updated"})
         assert result["updated"] is True
 
     def test_delete(self, client: Apikit):
@@ -172,7 +179,8 @@ class TestApikitFetchToFile:
     def test_fetch_to_file_ndjson(self, client: Apikit, tmp_dir: Path):
         data = [{"id": 1}, {"id": 2}]
         with respx.mock(base_url=BASE_URL):
-            respx.get(f"{BASE_URL}/data").mock(return_value=httpx.Response(200, json=data))
+            respx.get(
+                f"{BASE_URL}/data").mock(return_value=httpx.Response(200, json=data))
             path = client.fetch_to_file(
                 "/data", format="ndjson",
                 file_path=tmp_dir / "out.ndjson",
@@ -182,8 +190,10 @@ class TestApikitFetchToFile:
     def test_fetch_to_file_json(self, client: Apikit, tmp_dir: Path):
         data = [{"id": 1}]
         with respx.mock(base_url=BASE_URL):
-            respx.get(f"{BASE_URL}/data").mock(return_value=httpx.Response(200, json=data))
-            path = client.fetch_to_file("/data", format="json", file_path=tmp_dir / "out.json")
+            respx.get(
+                f"{BASE_URL}/data").mock(return_value=httpx.Response(200, json=data))
+            path = client.fetch_to_file(
+                "/data", format="json", file_path=tmp_dir / "out.json")
         assert path.exists()
         loaded = json.loads(path.read_bytes())
         assert loaded == data
@@ -192,7 +202,8 @@ class TestApikitFetchToFile:
     async def test_afetch_to_file(self, client: Apikit, tmp_dir: Path):
         data = [{"id": 5}]
         with respx.mock(base_url=BASE_URL):
-            respx.get(f"{BASE_URL}/async-data").mock(return_value=httpx.Response(200, json=data))
+            respx.get(
+                f"{BASE_URL}/async-data").mock(return_value=httpx.Response(200, json=data))
             path = await client.afetch_to_file(
                 "/async-data", format="json",
                 file_path=tmp_dir / "async_out.json",
@@ -209,7 +220,8 @@ class TestApikitGraphQL:
     def test_graphql_single_query(self, client: Apikit):
         body = {"data": {"me": {"login": "octocat"}}}
         with respx.mock(base_url=BASE_URL):
-            respx.post(f"{BASE_URL}/graphql").mock(return_value=httpx.Response(200, json=body))
+            respx.post(
+                f"{BASE_URL}/graphql").mock(return_value=httpx.Response(200, json=body))
             result = client.graphql("/graphql", "{ me { login } }")
         assert result == {"me": {"login": "octocat"}}
 
@@ -217,7 +229,8 @@ class TestApikitGraphQL:
     async def test_agraphql(self, client: Apikit):
         body = {"data": {"me": {"login": "async_user"}}}
         with respx.mock(base_url=BASE_URL):
-            respx.post(f"{BASE_URL}/graphql").mock(return_value=httpx.Response(200, json=body))
+            respx.post(
+                f"{BASE_URL}/graphql").mock(return_value=httpx.Response(200, json=body))
             result = await client.agraphql("/graphql", "{ me { login } }")
         assert result == {"me": {"login": "async_user"}}
 
@@ -232,7 +245,8 @@ class TestApikitAstream:
     async def test_astream_yields_all_records(self, client: Apikit):
         data = [{"id": 1}, {"id": 2}, {"id": 3}]
         with respx.mock(base_url=BASE_URL):
-            respx.get(f"{BASE_URL}/events").mock(return_value=httpx.Response(200, json=data))
+            respx.get(
+                f"{BASE_URL}/events").mock(return_value=httpx.Response(200, json=data))
             collected = []
             async for record in client.astream("/events", paginate=False):
                 collected.append(record)
@@ -242,7 +256,8 @@ class TestApikitAstream:
     async def test_astream_early_exit(self, client: Apikit):
         data = [{"id": i} for i in range(10)]
         with respx.mock(base_url=BASE_URL):
-            respx.get(f"{BASE_URL}/logs").mock(return_value=httpx.Response(200, json=data))
+            respx.get(
+                f"{BASE_URL}/logs").mock(return_value=httpx.Response(200, json=data))
             collected = []
             async for record in client.astream("/logs", paginate=False):
                 collected.append(record)

@@ -8,7 +8,7 @@ import time
 
 import pytest
 
-from kit import (
+from ikiapikit import (
     WebhookReceiver,
     WebhookEvent,
     StripeWebhookValidator,
@@ -78,12 +78,14 @@ class TestGitHubWebhookValidator:
         payload = b'{"action":"opened"}'
         sig = self._make_sig(secret, payload)
         validator = GitHubWebhookValidator(secret)
-        assert validator.validate(payload, {"x-hub-signature-256": sig}) is True
+        assert validator.validate(
+            payload, {"x-hub-signature-256": sig}) is True
 
     def test_invalid_signature_raises(self):
         validator = GitHubWebhookValidator("secret")
         with pytest.raises(WebhookSignatureError, match="mismatch"):
-            validator.validate(b"payload", {"x-hub-signature-256": "sha256=deadbeef"})
+            validator.validate(
+                b"payload", {"x-hub-signature-256": "sha256=deadbeef"})
 
     def test_missing_header_raises(self):
         validator = GitHubWebhookValidator("secret")
@@ -93,7 +95,8 @@ class TestGitHubWebhookValidator:
     def test_wrong_prefix_raises(self):
         validator = GitHubWebhookValidator("secret")
         with pytest.raises(WebhookSignatureError):
-            validator.validate(b"payload", {"x-hub-signature-256": "md5=abc123"})
+            validator.validate(
+                b"payload", {"x-hub-signature-256": "md5=abc123"})
 
 
 # ============================================================================
@@ -125,7 +128,8 @@ class TestGenericHmacValidator:
         import hmac as hmac_lib
         import hashlib as hl
         raw = hmac_lib.new(secret.encode(), payload, hl.sha256).hexdigest()
-        validator = GenericHmacValidator(secret, header_name="X-Sig", prefix="sha256=")
+        validator = GenericHmacValidator(
+            secret, header_name="X-Sig", prefix="sha256=")
         assert validator.validate(payload, {"x-sig": f"sha256={raw}"}) is True
 
 
@@ -173,7 +177,8 @@ class TestWebhookReceiver:
 
     def test_clear_removes_events(self):
         receiver = WebhookReceiver(dry_run=True)
-        event = WebhookEvent("wh_1", time.time(), {}, {"type": "test"}, b"{}", "test")
+        event = WebhookEvent("wh_1", time.time(), {}, {
+                             "type": "test"}, b"{}", "test")
         with receiver._event_lock:
             receiver._events.append(event)
         assert receiver.event_count == 1
@@ -190,7 +195,8 @@ class TestWebhookReceiver:
     def test_to_polars_from_events(self):
         pytest.importorskip("polars")
         receiver = WebhookReceiver(dry_run=True)
-        event = WebhookEvent("wh_1", time.time(), {}, {"type": "test"}, b"{}", "test")
+        event = WebhookEvent("wh_1", time.time(), {}, {
+                             "type": "test"}, b"{}", "test")
         with receiver._event_lock:
             receiver._events.append(event)
         df = receiver.to_polars()

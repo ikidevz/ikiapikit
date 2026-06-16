@@ -219,7 +219,7 @@ print(f"  (LogHook writes to Python logging — see INFO line above)")
 # ── 8. Built-in SlackHook ─────────────────────────────────────────────────────
 print("\n▶ SlackHook  — post to Slack on errors")
 print("""
-  from iki_apikit import SlackHook
+  from ikiapikit import SlackHook
 
   slack = SlackHook(
       webhook_url=os.environ["SLACK_WEBHOOK_URL"],
@@ -244,7 +244,7 @@ print("""
 print("\n▶ Async hooks  — async def hooks work seamlessly")
 print("""
   import asyncio
-  from iki_apikit import Apikit, HookContext
+  from ikiapikit import Apikit, HookContext
 
   async def async_alert(ctx: HookContext) -> None:
       async with httpx.AsyncClient() as hc:

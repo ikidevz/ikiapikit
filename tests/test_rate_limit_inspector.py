@@ -10,13 +10,13 @@ import httpx
 import pytest
 import respx
 
-from kit import (
+from ikiapikit import (
     Apikit,
     RateLimitState,
     ApiInspector,
     InspectorResult,
 )
-from tests.conftest import make_config, BASE_URL
+from .conftest import make_config, BASE_URL
 
 
 # ============================================================================
@@ -34,18 +34,21 @@ class TestRateLimitState:
 
     def test_ingest_standard_headers(self):
         rl = RateLimitState()
-        rl.ingest(self._make_headers(remaining=100, limit=5000, reset=time.time() + 3600))
+        rl.ingest(self._make_headers(remaining=100,
+                  limit=5000, reset=time.time() + 3600))
         assert rl._remaining == 100
         assert rl._limit == 5000
 
     def test_should_throttle_when_low(self):
         rl = RateLimitState(min_remaining=10)
-        rl.ingest(self._make_headers(remaining=5, limit=5000, reset=time.time() + 60))
+        rl.ingest(self._make_headers(
+            remaining=5, limit=5000, reset=time.time() + 60))
         assert rl.should_throttle() is True
 
     def test_should_not_throttle_when_sufficient(self):
         rl = RateLimitState(min_remaining=10)
-        rl.ingest(self._make_headers(remaining=100, limit=5000, reset=time.time() + 60))
+        rl.ingest(self._make_headers(remaining=100,
+                  limit=5000, reset=time.time() + 60))
         assert rl.should_throttle() is False
 
     def test_should_not_throttle_when_no_headers(self):
@@ -65,7 +68,8 @@ class TestRateLimitState:
 
     def test_headroom_property(self):
         rl = RateLimitState()
-        rl.ingest(self._make_headers(remaining=50, limit=100, reset=time.time() + 60))
+        rl.ingest(self._make_headers(remaining=50,
+                  limit=100, reset=time.time() + 60))
         h = rl.headroom
         assert h["remaining"] == 50
         assert h["limit"] == 100
@@ -77,7 +81,8 @@ class TestRateLimitState:
 
     def test_ingest_hubspot_header(self):
         rl = RateLimitState()
-        headers = httpx.Headers({"X-HubSpot-RateLimit-Daily-Remaining": "9800"})
+        headers = httpx.Headers(
+            {"X-HubSpot-RateLimit-Daily-Remaining": "9800"})
         rl.ingest(headers)
         assert rl._remaining == 9800
 
@@ -182,7 +187,8 @@ class TestApikitInspect:
     def test_inspect_via_facade(self, client: Apikit):
         body = [{"id": 1}]
         with respx.mock(base_url=BASE_URL):
-            respx.get(f"{BASE_URL}/probe").mock(return_value=httpx.Response(200, json=body))
+            respx.get(
+                f"{BASE_URL}/probe").mock(return_value=httpx.Response(200, json=body))
             result = client.inspect("/probe")
         assert isinstance(result, InspectorResult)
 

@@ -23,7 +23,7 @@ For GitHub examples, set:
 
 import asyncio
 import os
-from iki_apikit import Apikit, AuthConfig, ApiConfig, GraphQLError
+from ikiapikit import Apikit, AuthConfig, ApiConfig, GraphQLError
 
 COUNTRIES_URL = "https://countries.trevorblades.com/"
 

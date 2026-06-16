@@ -26,7 +26,7 @@ import json
 import tempfile
 from pathlib import Path
 
-from iki_apikit import Apikit, ApiConfig, AuthConfig, PaginationConfig, DbtExporter
+from ikiapikit import Apikit, ApiConfig, AuthConfig, PaginationConfig, DbtExporter
 
 BASE = "https://jsonplaceholder.typicode.com"
 

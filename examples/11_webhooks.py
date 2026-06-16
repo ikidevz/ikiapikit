@@ -33,7 +33,7 @@ from pathlib import Path
 
 import httpx
 
-from iki_apikit import (
+from ikiapikit import (
     WebhookReceiver,
     WebhookEvent,
     StripeWebhookValidator,

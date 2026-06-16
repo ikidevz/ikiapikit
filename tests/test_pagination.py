@@ -7,7 +7,7 @@ from __future__ import annotations
 import pytest
 import httpx
 
-from kit import (
+from ikiapikit import (
     PaginationConfig,
     NoPaginator,
     OffsetPaginator,
@@ -72,7 +72,8 @@ class TestOffsetPaginator:
         records_full_page = [{"id": i} for i in range(2)]
         resp = {"items": records_full_page}
         pag._offset = 0
-        next_p = pag.next_params({"limit": 2, "offset": 0}, resp, httpx.Headers())
+        next_p = pag.next_params(
+            {"limit": 2, "offset": 0}, resp, httpx.Headers())
         assert next_p["offset"] == 2
 
     def test_next_params_returns_none_on_short_page(self):
@@ -122,7 +123,8 @@ class TestCursorPaginator:
         assert next_p["after"] == "cursor_abc"
 
     def test_next_params_none_when_no_cursor(self):
-        pag = CursorPaginator(PaginationConfig(page_size=2, next_cursor_path="next_cursor"))
+        pag = CursorPaginator(PaginationConfig(
+            page_size=2, next_cursor_path="next_cursor"))
         resp = {"results": [1, 2], "next_cursor": None}
         assert pag.next_params({}, resp, httpx.Headers()) is None
 
@@ -138,7 +140,8 @@ class TestLinkHeaderPaginator:
 
     def test_next_params_returns_sentinel_with_url(self):
         pag = LinkHeaderPaginator(PaginationConfig(page_size=10))
-        headers = httpx.Headers({"Link": '<https://api.example.com/p2>; rel="next"'})
+        headers = httpx.Headers(
+            {"Link": '<https://api.example.com/p2>; rel="next"'})
         next_p = pag.next_params({}, [], headers)
         assert next_p["__link_next_url__"] == "https://api.example.com/p2"
 

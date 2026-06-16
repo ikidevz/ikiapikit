@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import pytest
 
-from kit import (
+from ikiapikit import (
     ApikitError,
     AuthError,
     RateLimitError,

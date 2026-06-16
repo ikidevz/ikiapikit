@@ -19,8 +19,8 @@ Run:
     python 03_pagination.py
 """
 
-from iki_apikit import ApiConfig, AuthConfig
-from iki_apikit import Apikit, ApiConfig, PaginationConfig
+from ikiapikit import ApiConfig, AuthConfig
+from ikiapikit import Apikit, ApiConfig, PaginationConfig
 
 print("=" * 60)
 print("03 · PAGINATION STRATEGIES")
@@ -37,7 +37,7 @@ print(f"  Got {len(records)} records (first page only)")
 print("\n▶ strategy='offset'  — limit / offset style")
 cfg = ApiConfig(
     base_url="https://jsonplaceholder.typicode.com",
-    auth=AuthConfig_stub := __import__("iki_apikit").AuthConfig(type="none"),
+    auth=AuthConfig_stub := __import__("ikiapikit").AuthConfig(type="none"),
     pagination=PaginationConfig(
         strategy="offset",
         page_size=10,

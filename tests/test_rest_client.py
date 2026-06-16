@@ -8,14 +8,14 @@ import pytest
 import httpx
 import respx
 
-from kit import (
+from ikiapikit import (
     AuthError,
     PaginationConfig,
     RetryConfig,
     RestClient,
     OffsetPaginator,
 )
-from tests.conftest import make_config, BASE_URL
+from .conftest import make_config, BASE_URL
 
 
 class TestRestClientSync:
@@ -23,7 +23,8 @@ class TestRestClientSync:
         cfg = make_config()
         client = RestClient(cfg)
         with respx.mock(base_url=BASE_URL) as mock:
-            mock.get("/users").mock(return_value=httpx.Response(200, json={"users": []}))
+            mock.get(
+                "/users").mock(return_value=httpx.Response(200, json={"users": []}))
             result = client.request_sync("GET", "/users")
         assert result == {"users": []}
 
@@ -31,7 +32,8 @@ class TestRestClientSync:
         cfg = make_config()
         client = RestClient(cfg)
         with respx.mock(base_url=BASE_URL):
-            respx.get(f"{BASE_URL}/secret").mock(return_value=httpx.Response(401))
+            respx.get(
+                f"{BASE_URL}/secret").mock(return_value=httpx.Response(401))
             with pytest.raises(AuthError):
                 client.request_sync("GET", "/secret")
 
@@ -58,7 +60,8 @@ class TestRestClientSync:
         client = RestClient(cfg)
         data = [{"id": 1}, {"id": 2}]
         with respx.mock(base_url=BASE_URL):
-            respx.get(f"{BASE_URL}/items").mock(return_value=httpx.Response(200, json=data))
+            respx.get(
+                f"{BASE_URL}/items").mock(return_value=httpx.Response(200, json=data))
             records = client.get_all_pages_sync("/items")
         assert records == data
 
@@ -77,7 +80,8 @@ class TestRestClientSync:
 
         with respx.mock(base_url=BASE_URL):
             respx.get(f"{BASE_URL}/items").mock(side_effect=handler)
-            records = client.get_all_pages_sync("/items", paginator=OffsetPaginator(cfg.pagination))
+            records = client.get_all_pages_sync(
+                "/items", paginator=OffsetPaginator(cfg.pagination))
         assert len(records) == 3
 
 
@@ -87,7 +91,8 @@ class TestRestClientAsync:
         cfg = make_config()
         client = RestClient(cfg)
         with respx.mock(base_url=BASE_URL):
-            respx.get(f"{BASE_URL}/data").mock(return_value=httpx.Response(200, json={"ok": True}))
+            respx.get(
+                f"{BASE_URL}/data").mock(return_value=httpx.Response(200, json={"ok": True}))
             result = await client.request_async("GET", "/data")
         assert result == {"ok": True}
 
@@ -96,7 +101,8 @@ class TestRestClientAsync:
         cfg = make_config()
         client = RestClient(cfg)
         with respx.mock(base_url=BASE_URL):
-            respx.get(f"{BASE_URL}/auth").mock(return_value=httpx.Response(401))
+            respx.get(
+                f"{BASE_URL}/auth").mock(return_value=httpx.Response(401))
             with pytest.raises(AuthError):
                 await client.request_async("GET", "/auth")
 
@@ -106,7 +112,8 @@ class TestRestClientAsync:
         client = RestClient(cfg)
         data = [{"id": 1}, {"id": 2}, {"id": 3}]
         with respx.mock(base_url=BASE_URL):
-            respx.get(f"{BASE_URL}/stream").mock(return_value=httpx.Response(200, json=data))
+            respx.get(
+                f"{BASE_URL}/stream").mock(return_value=httpx.Response(200, json=data))
             received = []
             async for rec in client.astream("/stream"):
                 received.append(rec)

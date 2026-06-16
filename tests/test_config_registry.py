@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from kit import (
+from ikiapikit import (
     Apikit,
     ApiConfig,
     AuthConfig,
@@ -43,7 +43,8 @@ class TestConfigManager:
 
     def test_get_connector_raw(self, tmp_dir: Path):
         mgr = ConfigManager(config_path=tmp_dir / "config.toml")
-        mgr.add_connector("api", base_url="https://test.com", store_secret_in_keyring=False)
+        mgr.add_connector("api", base_url="https://test.com",
+                          store_secret_in_keyring=False)
         raw = mgr.get_connector_raw("api")
         assert raw["base_url"] == "https://test.com"
 
@@ -61,7 +62,8 @@ class TestConfigManager:
 
     def test_remove_connector(self, tmp_dir: Path):
         mgr = ConfigManager(config_path=tmp_dir / "config.toml")
-        mgr.add_connector("api", base_url="https://test.com", store_secret_in_keyring=False)
+        mgr.add_connector("api", base_url="https://test.com",
+                          store_secret_in_keyring=False)
         mgr.remove_connector("api")
         assert "api" not in mgr.list_connectors()
 

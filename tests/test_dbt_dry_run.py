@@ -10,12 +10,12 @@ import httpx
 import pytest
 import respx
 
-from kit import (
+from ikiapikit import (
     Apikit,
     DbtExporter,
     DryRunResult,
 )
-from tests.conftest import make_config, BASE_URL
+from .conftest import make_config, BASE_URL
 
 
 # ============================================================================
@@ -27,7 +27,8 @@ class TestDbtExporter:
     def test_export_creates_files(self, tmp_dir: Path, records: list[dict]):
         pytest.importorskip("polars")
         exporter = DbtExporter(output_dir=tmp_dir / "dbt")
-        paths = exporter.export(records, "test_table", database="raw", schema="public")
+        paths = exporter.export(records, "test_table",
+                                database="raw", schema="public")
         assert "seed" in paths
         assert "sources" in paths
         assert "schema" in paths
@@ -73,7 +74,8 @@ class TestDbtExporter:
     def test_render_schema_yaml_contains_columns(self, tmp_dir: Path):
         exporter = DbtExporter(output_dir=tmp_dir)
         cols = [{"name": "id", "dtype": "int", "description": "Primary key"}]
-        yaml = exporter._render_schema_yaml("my_model", "A model", cols, None, None)
+        yaml = exporter._render_schema_yaml(
+            "my_model", "A model", cols, None, None)
         assert "my_model" in yaml
         assert "id" in yaml
         assert "int" in yaml
@@ -84,7 +86,8 @@ class TestDbtExporter:
         client = Apikit.from_config(cfg)
         data = [{"id": i, "value": i * 10} for i in range(3)]
         with respx.mock(base_url=BASE_URL):
-            respx.get(f"{BASE_URL}/data").mock(return_value=httpx.Response(200, json=data))
+            respx.get(
+                f"{BASE_URL}/data").mock(return_value=httpx.Response(200, json=data))
             exporter = DbtExporter(output_dir=tmp_dir / "dbt")
             paths = exporter.export_from_client(
                 client, "/data", "my_data",
@@ -104,7 +107,8 @@ class TestDryRunResult:
             method="GET",
             url="https://api.example.com/users",
             params={"status": "active"},
-            headers={"Accept": "application/json", "Authorization": "Bearer tok"},
+            headers={"Accept": "application/json",
+                     "Authorization": "Bearer tok"},
             auth_type="bearer",
             pagination_strategy="cursor",
             page_size=100,
@@ -129,7 +133,8 @@ class TestDryRunResult:
         assert result.to_dict()["params"] == {}
 
     def test_output_path_serialized_as_string(self):
-        result = self._make_result(output_format="parquet", output_path=Path("/tmp/out.parquet"))
+        result = self._make_result(
+            output_format="parquet", output_path=Path("/tmp/out.parquet"))
         assert result.to_dict()["output_path"] == "/tmp/out.parquet"
 
     def test_output_path_none_when_not_set(self):
@@ -143,7 +148,8 @@ class TestDryRunResult:
     def test_fetch_records_dry_run_integration(self):
         cfg = make_config()
         client = Apikit.from_config(cfg)
-        result = client.fetch_records("/users", dry_run=True, show_progress=False)
+        result = client.fetch_records(
+            "/users", dry_run=True, show_progress=False)
         assert isinstance(result, DryRunResult)
         assert result.auth_type == "bearer"
         assert "users" in result.url

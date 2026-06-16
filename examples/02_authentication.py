@@ -21,7 +21,7 @@ Run:
     python 02_authentication.py
 """
 
-from iki_apikit import Apikit, ApiConfig, AuthConfig
+from ikiapikit import Apikit, ApiConfig, AuthConfig
 
 print("=" * 60)
 print("02 · AUTHENTICATION")

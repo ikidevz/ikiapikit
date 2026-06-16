@@ -18,7 +18,7 @@ Formats: parquet | ndjson | jsonl | csv | arrow | json | duckdb
 import io
 import os
 import tempfile
-from iki_apikit import Apikit, get_writer, ApiConfig, AuthConfig, PaginationConfig
+from ikiapikit import Apikit, get_writer, ApiConfig, AuthConfig, PaginationConfig
 
 BASE = "https://jsonplaceholder.typicode.com"
 

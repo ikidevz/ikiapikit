@@ -11,7 +11,7 @@ import httpx
 import pytest
 import respx
 
-from kit import (
+from ikiapikit import (
     Apikit,
     ApiConfig,
     AuthConfig,
@@ -19,7 +19,7 @@ from kit import (
     PaginationConfig,
     ConfigManager,
 )
-from tests.conftest import make_config, BASE_URL
+from .conftest import make_config, BASE_URL
 
 
 # ============================================================================
@@ -33,7 +33,8 @@ class TestIntegrationSyncFlow:
         cfg = ApiConfig(
             base_url=BASE_URL,
             auth=AuthConfig(type="bearer", token="tok"),
-            pagination=PaginationConfig(strategy="offset", page_size=2, data_path=None),
+            pagination=PaginationConfig(
+                strategy="offset", page_size=2, data_path=None),
             retry=RetryConfig(max_attempts=1, min_wait=0.0, max_wait=0.0),
         )
         client = Apikit.from_config(cfg)
@@ -48,7 +49,8 @@ class TestIntegrationSyncFlow:
 
         with respx.mock(base_url=BASE_URL):
             respx.get(f"{BASE_URL}/items").mock(side_effect=handler)
-            df = client.fetch_polars("/items", paginate=True, show_progress=False)
+            df = client.fetch_polars(
+                "/items", paginate=True, show_progress=False)
         assert isinstance(df, pl.DataFrame)
         assert len(df) == 3
 
@@ -57,8 +59,10 @@ class TestIntegrationSyncFlow:
         client = Apikit.from_config(cfg)
         response = {"data": {"items": [{"id": 1}, {"id": 2}]}}
         with respx.mock(base_url=BASE_URL):
-            respx.get(f"{BASE_URL}/wrapped").mock(return_value=httpx.Response(200, json=response))
-            records = client.fetch_records("/wrapped", data_path="data.items", show_progress=False)
+            respx.get(
+                f"{BASE_URL}/wrapped").mock(return_value=httpx.Response(200, json=response))
+            records = client.fetch_records(
+                "/wrapped", data_path="data.items", show_progress=False)
         assert len(records) == 2
 
     def test_post_then_delete_workflow(self):
@@ -105,7 +109,8 @@ class TestIntegrationAsyncFlow:
         client = Apikit.from_config(cfg)
         data = [{"id": i} for i in range(5)]
         with respx.mock(base_url=BASE_URL):
-            respx.get(f"{BASE_URL}/stream").mock(return_value=httpx.Response(200, json=data))
+            respx.get(
+                f"{BASE_URL}/stream").mock(return_value=httpx.Response(200, json=data))
             collected = [rec async for rec in client.astream("/stream", paginate=False)]
         assert len(collected) == 5
         assert [r["id"] for r in collected] == list(range(5))
@@ -123,8 +128,10 @@ class TestIntegrationFlatteningAndWriters:
         client = Apikit.from_config(cfg)
         data = [{"id": 1, "meta": {"score": 9.5, "tag": "A"}}]
         with respx.mock(base_url=BASE_URL):
-            respx.get(f"{BASE_URL}/data").mock(return_value=httpx.Response(200, json=data))
-            path = client.fetch_to_file("/data", format="csv", file_path=tmp_dir / "out.csv")
+            respx.get(
+                f"{BASE_URL}/data").mock(return_value=httpx.Response(200, json=data))
+            path = client.fetch_to_file(
+                "/data", format="csv", file_path=tmp_dir / "out.csv")
         assert path.exists()
         content = path.read_text()
         assert "meta__score" in content
@@ -136,7 +143,8 @@ class TestIntegrationFlatteningAndWriters:
         client = Apikit.from_config(cfg)
         data = [{"id": i, "nested": {"val": i * 2}} for i in range(3)]
         with respx.mock(base_url=BASE_URL):
-            respx.get(f"{BASE_URL}/data").mock(return_value=httpx.Response(200, json=data))
+            respx.get(
+                f"{BASE_URL}/data").mock(return_value=httpx.Response(200, json=data))
             path = client.fetch_to_file(
                 "/data", format="parquet", file_path=tmp_dir / "out.parquet")
         assert path.exists()
