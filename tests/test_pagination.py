@@ -15,27 +15,27 @@ from ikiapikit import (
     CursorPaginator,
     LinkHeaderPaginator,
     build_paginator,
-    _get_nested,
+    get_nested,
     PaginationError,
 )
 
 
 class TestGetNested:
     def test_simple_key(self):
-        assert _get_nested({"a": 1}, "a") == 1
+        assert get_nested({"a": 1}, "a") == 1
 
     def test_nested_path(self):
-        assert _get_nested({"a": {"b": {"c": 42}}}, "a.b.c") == 42
+        assert get_nested({"a": {"b": {"c": 42}}}, "a.b.c") == 42
 
     def test_missing_key_returns_none(self):
-        assert _get_nested({"a": 1}, "b") is None
+        assert get_nested({"a": 1}, "b") is None
 
     def test_list_index(self):
-        assert _get_nested({"items": [10, 20, 30]}, "items.1") == 20
+        assert get_nested({"items": [10, 20, 30]}, "items.1") == 20
 
     def test_empty_path_returns_obj(self):
         obj = {"x": 1}
-        assert _get_nested(obj, "") is obj
+        assert get_nested(obj, "") is obj
 
 
 class TestNoPaginator:

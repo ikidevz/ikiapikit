@@ -4,7 +4,6 @@ tests/test_apikit_facade.py  —  §12  Apikit facade (constructors, fetch, muta
 
 from __future__ import annotations
 
-import asyncio
 import json
 from pathlib import Path
 from unittest.mock import patch
@@ -16,13 +15,10 @@ import respx
 from ikiapikit import (
     Apikit,
     ApiConfig,
-    AuthConfig,
-    RetryConfig,
-    PaginationConfig,
     ConnectorNotFoundError,
     DryRunResult,
 )
-from .conftest import make_config, BASE_URL
+from .conftest import BASE_URL
 
 
 # ============================================================================

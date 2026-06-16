@@ -1,48 +1,23 @@
-from ikiapikit import (
-    DEFAULT_TIMEOUT,
-    DEFAULT_MAX_RETRIES,
-    DEFAULT_PAGE_SIZE,
-    AuthType,
-    ApiConfig,
-    AuthConfig,
-    CacheConfig,
-    RetryConfig,
-    HookFn,
-    RestClient,
-    LruCache,
-    build_cache,
-    HookRegistry,
-    DryRunResult,
-    ConnectorRegistry,
-    ConnectorNotFoundError,
-    ConfigManager,
-    SecretStr,
-    PaginationStrategy,
-    PaginatorBase,
-    NoPaginator,
-    build_paginator,
-    Progress,
-    SpinnerColumn,
-    TextColumn,
-    BarColumn,
-    TaskProgressColumn,
-    TimeElapsedColumn,
-    HookContext,
-    flatten_records,
-    apply_field_ops,
-    validate_records,
-    ValidationResult,
-    records_to_polars,
-    ApikitError,
-    records_to_pandas,
-    OutputFormat,
-    get_writer,
-    InspectorResult,
-    ApiInspector,
-    print_inspector_result,
-    GraphQLClient,
+from .config.manager import ConfigManager
+from .connectors.base import ConnectorRegistry
 
-)
+from .core.constants import DEFAULT_TIMEOUT, DEFAULT_MAX_RETRIES, DEFAULT_PAGE_SIZE
+from .core.exceptions import ApikitError,  ConnectorNotFoundError
+from .core.models import AuthConfig, RetryConfig, ApiConfig, CacheConfig
+from .core.types import OutputFormat, AuthType, PaginationStrategy
+
+from .features.cache import LruCache, build_cache
+from .features.inspector import ApiInspector, print_inspector_result, InspectorResult
+from .features.hooks import HookContext, HookFn, HookRegistry
+from .features.validation import ValidationResult, validate_records
+from .features.dry_run import DryRunResult
+
+from .http.pagination import PaginatorBase, build_paginator, NoPaginator
+from .http.client import RestClient
+from .http.graphql import GraphQLClient
+
+from .io.transform import records_to_polars, records_to_pandas, flatten_records, apply_field_ops
+from .io.writers import get_writer
 
 from typing import (
     Any,
@@ -52,8 +27,17 @@ from typing import (
     Optional,
     Union
 )
+from pydantic import SecretStr
 from pathlib import Path
 from rich.console import Console
+from rich.progress import (
+    BarColumn,
+    Progress,
+    SpinnerColumn,
+    TaskProgressColumn,
+    TextColumn,
+    TimeElapsedColumn,
+)
 import polars as pl
 import pandas as pd
 import httpx

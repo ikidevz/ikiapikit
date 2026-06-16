@@ -11,7 +11,7 @@ from ikiapikit import (
     flatten_records,
     records_to_polars,
     records_to_pandas,
-    infer_polars_schema,
+    infer_schema_dataframe
 )
 
 
@@ -95,17 +95,17 @@ class TestRecordsToPandas:
 class TestInferPolarsSchema:
     def test_returns_dict_of_types(self, records: list[dict]):
         pytest.importorskip("polars")
-        schema = infer_polars_schema(records)
+        schema = infer_schema_dataframe(records, 'polars')
         assert schema is not None
         assert "id" in schema
 
     def test_returns_none_for_empty(self):
-        assert infer_polars_schema([]) is None
+        assert infer_schema_dataframe([], 'polars') is None
 
     def test_returns_none_without_polars(self, records: list[dict]):
         orig = HAS_POLARS
         try:
             HAS_POLARS = False
-            assert infer_polars_schema(records) is None
+            assert infer_schema_dataframe(records, 'polars') is None
         finally:
             HAS_POLARS = orig

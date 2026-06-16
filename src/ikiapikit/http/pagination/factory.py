@@ -1,10 +1,10 @@
 from .base import PaginatorBase
+from .cursor import CursorPaginator
+from .link_header import LinkHeaderPaginator
 from .strategies import (
     NoPaginator,
     OffsetPaginator,
-    PageNumberPaginator,
-    CursorPaginator,
-    LinkHeaderPaginator
+    PageNumberPaginator
 )
 from ...core.models import PaginationConfig
 

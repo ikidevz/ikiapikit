@@ -10,6 +10,7 @@ from .auth import (
 
 from .pagination import (
     PaginatorBase,
+    get_nested,
     CursorPaginator,
     build_paginator,
     LinkHeaderPaginator,
@@ -34,6 +35,7 @@ __all__ = [
     'ApiKeyAuth',
     'BasicAuth',
     'PaginatorBase',
+    'get_nested',
     'CursorPaginator',
     'build_paginator',
     'LinkHeaderPaginator',

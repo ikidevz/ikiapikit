@@ -1,6 +1,9 @@
 from .config import ConfigManager
 from .connectors import ConnectorDefinition, ConnectorRegistry
 from .core import (
+    DEFAULT_TIMEOUT,
+    DEFAULT_MAX_RETRIES,
+    DEFAULT_PAGE_SIZE,
     ApikitError,
     AuthError,
     RateLimitError,
@@ -16,6 +19,7 @@ from .core import (
     RetryConfig,
     PaginationConfig,
     ApiConfig,
+    CacheConfig,
     OutputFormat,
     AuthType,
     PaginationStrategy
@@ -44,7 +48,9 @@ from .features import (
     LogHook,
     SlackHook,
     ValidationResult,
-    validate_records
+    validate_records,
+    DryRunResult,
+    RateLimitState,
 )
 
 from .http import (
@@ -56,6 +62,7 @@ from .http import (
     ApiKeyAuth,
     BasicAuth,
     PaginatorBase,
+    get_nested,
     CursorPaginator,
     build_paginator,
     LinkHeaderPaginator,
@@ -89,12 +96,17 @@ from .io import (
     ArrowWriter
 )
 
+from .facade import Apikit
+
 from ._version import __version__
 
 __all__ = [
     'ConfigManager',
     'ConnectorDefinition',
     'ConnectorRegistry',
+    'DEFAULT_TIMEOUT',
+    'DEFAULT_MAX_RETRIES',
+    'DEFAULT_PAGE_SIZE',
     "ApikitError",
     "AuthError",
     "RateLimitError",
@@ -110,6 +122,7 @@ __all__ = [
     "RetryConfig",
     "PaginationConfig",
     "ApiConfig",
+    'CacheConfig',
     "OutputFormat",
     "AuthType",
     "PaginationStrategy",
@@ -150,6 +163,7 @@ __all__ = [
     'ApiKeyAuth',
     'BasicAuth',
     'PaginatorBase',
+    'get_nested',
     'CursorPaginator',
     'build_paginator',
     'LinkHeaderPaginator',
@@ -174,5 +188,6 @@ __all__ = [
     'apply_rename',
     'apply_transform',
     'apply_field_ops',
+    'Apikit',
     "__version__"
 ]

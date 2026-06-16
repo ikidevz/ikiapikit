@@ -1,3 +1,10 @@
+
+from .constants import (
+    DEFAULT_TIMEOUT,
+    DEFAULT_MAX_RETRIES,
+    DEFAULT_PAGE_SIZE
+)
+
 from .exceptions import (
     ApikitError,
     AuthError,
@@ -16,7 +23,8 @@ from .models import (
     AuthConfig,
     RetryConfig,
     PaginationConfig,
-    ApiConfig
+    ApiConfig,
+    CacheConfig
 )
 
 from .types import (
@@ -26,6 +34,9 @@ from .types import (
 )
 
 __all__ = [
+    'DEFAULT_TIMEOUT',
+    'DEFAULT_MAX_RETRIES',
+    'DEFAULT_PAGE_SIZE',
     "ApikitError",
     "AuthError",
     "RateLimitError",
@@ -41,6 +52,7 @@ __all__ = [
     "RetryConfig",
     "PaginationConfig",
     "ApiConfig",
+    'CacheConfig',
     "OutputFormat",
     "AuthType",
     "PaginationStrategy",
