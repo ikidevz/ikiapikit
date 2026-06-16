@@ -1,0 +1,9 @@
+from pathlib import Path
+
+DEFAULT_CONFIG_DIR = Path.home() / ".config" / "ikiapikit"
+DEFAULT_CONFIG_FILE = DEFAULT_CONFIG_DIR / "config.toml"
+DEFAULT_TIMEOUT = 30.0
+DEFAULT_MAX_RETRIES = 3
+DEFAULT_PAGE_SIZE = 100
+DEFAULT_MAX_PAGES = 1_000
+KEYRING_SERVICE = "ikiapikit"
