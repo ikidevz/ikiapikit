@@ -29,7 +29,7 @@ _Built for data engineers, data scientists, and analysts_
 `iki-apikit` is a production-ready Python library that gives you a **single, ergonomic facade** for working with any REST or GraphQL API. It handles the hard parts — auth, pagination, retries, rate limits, output formats, and DataFrame conversion — so you can focus on the data.
 
 ```python
-from iki_apikit import Apikit
+from ikiapikit import Apikit
 
 client = Apikit.from_name("github", token="ghp_...")
 
@@ -81,7 +81,7 @@ client.fetch_to_file("/orders", format="parquet", file_path="orders.parquet", pa
 ## Installation
 
 ```bash
-pip install iki_apikit
+pip install ikiapikit
 ```
 
 All backends — Polars, Pandas, PyArrow, DuckDB, keyring — are included out of the box. Install once, use every feature immediately.
@@ -91,7 +91,7 @@ All backends — Polars, Pandas, PyArrow, DuckDB, keyring — are included out o
 ## Quick Start
 
 ```python
-from iki_apikit import Apikit
+from ikiapikit import Apikit
 
 # ── Named connector (pre-built) ──────────────────────────────────────────────
 client = Apikit.from_name("github", token="ghp_...")
@@ -146,7 +146,7 @@ A cheat-sheet for the most common patterns:
 **Ad-hoc — provide everything inline:**
 
 ```python
-from iki_apikitimport Apikit
+from ikiapikitimport Apikit
 
 client = Apikit(
     base_url="https://api.example.com",
@@ -170,7 +170,7 @@ client = Apikit.from_name("my_company_api")   # from ~/.config/apikit/config.tom
 **Full config object — for maximum control:**
 
 ```python
-from iki_apikitimport Apikit, ApiConfig, AuthConfig, RetryConfig, PaginationConfig
+from ikiapikitimport Apikit, ApiConfig, AuthConfig, RetryConfig, PaginationConfig
 
 cfg = ApiConfig(
     base_url="https://api.example.com",
@@ -532,7 +532,7 @@ records = client.fetch_records(
 | **DuckDB**    | `"duckdb"`             | DuckDB           | In-process SQL                  |
 
 ```python
-from apikit import get_writer
+from ikiapikit import get_writer
 import io
 
 records = [{"id": 1, "name": "Alice"}, {"id": 2, "name": "Bob"}]
@@ -558,7 +558,7 @@ Nested JSON is flattened using `__` as the separator by default. Lists are seria
 # After flattening (automatic in fetch_polars / fetch_pandas / file writers):
 # {"id": 1, "user__name": "Alice", "user__address__city": "NYC", "tags": '["a","b"]'}
 
-from apikit import _flatten_dict, _flatten_records, records_to_polars
+from ikiapikit import _flatten_dict, _flatten_records, records_to_polars
 
 flat = _flatten_dict({"a": {"b": {"c": 42}}})
 # → {"a__b__c": 42}
@@ -572,7 +572,7 @@ df = records_to_polars(raw_api_response)
 **Schema inference:**
 
 ```python
-from apikit import infer_polars_schema
+from ikiapikit import infer_polars_schema
 
 records = client.fetch_records("/contacts", page_size=10)
 schema = infer_polars_schema(records)
@@ -586,7 +586,7 @@ schema = infer_polars_schema(records)
 **Retry configuration:**
 
 ```python
-from apikit import RetryConfig
+from ikiapikit import RetryConfig
 
 cfg = RetryConfig(
     max_attempts=5,
@@ -602,7 +602,7 @@ When the API returns `429`, apikit reads the `Retry-After` header, sleeps that d
 **Manual rate limit inspection:**
 
 ```python
-from apikit import RateLimitState
+from ikiapikit import RateLimitState
 
 rl = RateLimitState(min_remaining=100)
 rl.ingest(response.headers)   # parses X-RateLimit-* headers from any provider
@@ -647,7 +647,7 @@ client = Apikit.from_name("jsonplaceholder")  # no auth needed
 List all registered connectors at runtime:
 
 ```python
-from apikit import ConnectorRegistry
+from ikiapikit import ConnectorRegistry
 
 print(ConnectorRegistry.list())
 # → ["github", "stripe", "hubspot", "notion", ...]
@@ -658,7 +658,7 @@ print(ConnectorRegistry.list())
 ## Custom Connectors
 
 ```python
-from apikit import ConnectorRegistry, ConnectorDefinition, PaginationConfig
+from ikiapikit import ConnectorRegistry, ConnectorDefinition, PaginationConfig
 
 @ConnectorRegistry.register
 def _my_api() -> ConnectorDefinition:
@@ -687,7 +687,7 @@ client = Apikit.from_name("my_api", token="your-token")
 Save API configs to `~/.config/apikit/config.toml`. Secrets go to the OS keyring (macOS Keychain, Windows Credential Manager, Linux Secret Service) and are never written to disk in plain text.
 
 ```python
-from apikit import ConfigManager
+from ikiapikit import ConfigManager
 
 mgr = ConfigManager()
 
@@ -756,7 +756,7 @@ result = client.inspect("/users", dry_run=True)
 A local HTTP server that validates, records, and streams incoming webhooks. Useful for local development and testing integrations.
 
 ```python
-from apikit import WebhookReceiver, StripeWebhookValidator
+from ikiapikit import WebhookReceiver, StripeWebhookValidator
 
 receiver = WebhookReceiver(
     port=8080,
@@ -782,7 +782,7 @@ df = receiver.to_polars()
 **Available validators:**
 
 ```python
-from apikit import (
+from ikiapikit import (
     StripeWebhookValidator,     # Stripe-Signature header + timestamp tolerance
     GitHubWebhookValidator,     # X-Hub-Signature-256 header
     GenericHmacValidator,       # any HMAC-SHA256 header with configurable prefix
@@ -803,7 +803,7 @@ validator = GenericHmacValidator(
 Generate dbt-ready seed CSV + `sources.yml` + `schema.yml` from any API fetch:
 
 ```python
-from apikit import DbtExporter
+from ikiapikit import DbtExporter
 
 exporter = DbtExporter(output_dir="dbt_seeds/")
 
@@ -881,7 +881,7 @@ print(result.to_dict())
 All apikit errors inherit from `ApikitError`:
 
 ```python
-from apikit import (
+from ikiapikit import (
     ApikitError,             # base class
     AuthError,               # 401 Unauthorized
     RateLimitError,          # 429 after all retries exhausted
