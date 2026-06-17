@@ -22,7 +22,6 @@ from ikiapikit import Apikit, get_writer, ApiConfig, AuthConfig, PaginationConfi
 
 BASE = "https://jsonplaceholder.typicode.com"
 
-# Fetch sample records once
 client = Apikit(base_url=BASE, auth="none")
 records = client.fetch_records("/users", show_progress=False)
 print("=" * 60)
@@ -30,7 +29,7 @@ print("06 · OUTPUT FORMATS")
 print("=" * 60)
 print(f"\nBase dataset: {len(records)} user records")
 
-with tempfile.TemporaryDirectory() as tmpdir:
+with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdir:
     def path(filename):
         return os.path.join(tmpdir, filename)
 
@@ -40,8 +39,7 @@ with tempfile.TemporaryDirectory() as tmpdir:
         p = path("users.parquet")
         get_writer("parquet").write(records, p)
         size = os.path.getsize(p)
-        print(f"  Written: {p.split('/')[-1]}  ({size:,} bytes)")
-        # Read it back to verify
+        print(f"  Written: users.parquet  ({size:,} bytes)")
         try:
             import polars as pl
             df = pl.read_parquet(p)
@@ -91,8 +89,9 @@ with tempfile.TemporaryDirectory() as tmpdir:
         size = os.path.getsize(p)
         print(f"  Written: {size:,} bytes")
         import pyarrow.ipc as ipc
-        with ipc.open_file(p) as f:
-            tbl = f.read_all()
+        # Explicitly close the reader before tempdir cleanup on Windows
+        with ipc.open_file(p) as reader:
+            tbl = reader.read_all()
         print(f"  Read back: {tbl.num_rows} rows × {tbl.num_columns} cols")
     except Exception as e:
         print(f"  (skipped — {e})")
@@ -103,9 +102,11 @@ with tempfile.TemporaryDirectory() as tmpdir:
         p = path("users.duckdb")
         get_writer("duckdb").write(records, p)
         import duckdb
-        con = duckdb.connect(p)
-        result = con.execute("SELECT name, email FROM data LIMIT 3").fetchall()
-        con.close()
+        # Use context manager so the connection closes before tempdir cleanup
+        with duckdb.connect(p) as con:
+            result = con.execute(
+                "SELECT name, email FROM data LIMIT 3"
+            ).fetchall()
         print(f"  DuckDB query SELECT name, email FROM data LIMIT 3:")
         for row in result:
             print(f"    {row[0]:<20} {row[1]}")
@@ -157,7 +158,6 @@ with tempfile.TemporaryDirectory() as tmpdir:
     print(f"  Buffer size : {len(content):,} bytes")
     print(f"  Line count  : {content.count(b'\\n')}")
 
-    # Or use the to_bytes() helper
     raw_bytes = get_writer("json").to_bytes(records)
     print(f"  to_bytes()  : {len(raw_bytes):,} bytes of JSON")
 

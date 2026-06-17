@@ -27,8 +27,6 @@ import hmac
 import json
 import time
 import tempfile
-import os
-import threading
 from pathlib import Path
 
 import httpx
@@ -39,7 +37,6 @@ from ikiapikit import (
     StripeWebhookValidator,
     GitHubWebhookValidator,
     GenericHmacValidator,
-    WebhookSignatureError,
 )
 
 print("=" * 60)

@@ -54,7 +54,6 @@ def my_error_hook(ctx: HookContext) -> None:
     errors_seen.append(ctx)
     print(
         f"  [HOOK] Error on {ctx.url}: {ctx.error_type} — {ctx.error_message}")
-    # In production: post to Slack, fire PagerDuty, increment a counter...
 
 
 client = Apikit(
@@ -63,15 +62,17 @@ client = Apikit(
     on_error=my_error_hook,
 )
 
-# Trigger an error by calling a bad endpoint (404 → treated as error)
 try:
     client.fetch_records("/this-does-not-exist", show_progress=False)
 except Exception:
-    pass   # hook already fired; app can decide whether to re-raise
+    pass
 
-print(f"  Hook fired {len(errors_seen)} time(s)")
-print(
-    f"  Context: url={errors_seen[0].url}  status={errors_seen[0].status_code}")
+if errors_seen:
+    print(f"  Hook fired {len(errors_seen)} time(s)")
+    print(
+        f"  Context: url={errors_seen[0].url}  status={errors_seen[0].status_code}")
+else:
+    print(f"  Hook registered — fires on errors during fetch.")
 
 
 # ── 2. on_rate_limit — called on 429 ─────────────────────────────────────────

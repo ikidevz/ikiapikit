@@ -22,7 +22,7 @@ Run:
     python 12_dbt_exporter.py
 """
 
-import json
+
 import tempfile
 from pathlib import Path
 

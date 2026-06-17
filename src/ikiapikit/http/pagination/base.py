@@ -15,12 +15,24 @@ class PaginatorBase(ABC):
         self._page_count = 0
 
     def _check_limit(self) -> None:
+        """Hard limit — raises PaginationError when max_pages is exceeded."""
         self._page_count += 1
         if self._page_count > self.cfg.max_pages:
             raise PaginationError(
                 f"Exceeded max_pages={self.cfg.max_pages}. "
                 "Increase pagination.max_pages or add a filter."
             )
+
+    def _is_at_limit(self) -> bool:
+        """
+        Soft limit — increments the page counter and returns True when
+        max_pages is reached, instead of raising. Use this in strategies
+        that should stop cleanly rather than blow up.
+        """
+        self._page_count += 1
+        if self.cfg.max_pages and self._page_count > self.cfg.max_pages:
+            return True
+        return False
 
     @abstractmethod
     def first_params(self, user_params: dict) -> dict:

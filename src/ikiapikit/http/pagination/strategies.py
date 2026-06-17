@@ -40,9 +40,10 @@ class OffsetPaginator(PaginatorBase):
         }
 
     def next_params(self, user_params, response_json, response_headers) -> Optional[dict]:
-        self._check_limit()
         records = self.extract_records(response_json)
         if len(records) < self.cfg.page_size:
+            return None
+        if self._is_at_limit():
             return None
         self._offset += self.cfg.page_size
         return {
@@ -67,10 +68,23 @@ class PageNumberPaginator(PaginatorBase):
         }
 
     def next_params(self, user_params, response_json, response_headers) -> Optional[dict]:
-        self._check_limit()
         records = self.extract_records(response_json)
+
         if not records or len(records) < self.cfg.page_size:
             return None
+
+        if self.cfg.total_pages_path:
+            total = get_nested(response_json, self.cfg.total_pages_path)
+            if total is not None and self._page >= int(total):
+                return None
+
+        total_count = response_headers.get("x-total-count")
+        if total_count and (self._page * self.cfg.page_size) >= int(total_count):
+            return None
+
+        if self._is_at_limit():
+            return None
+
         self._page += 1
         return {
             **user_params,

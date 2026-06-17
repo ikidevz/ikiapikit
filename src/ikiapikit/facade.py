@@ -187,7 +187,7 @@ class Apikit:
         cls,
         config: ApiConfig,
         *,
-        cache: Union[bool, "CacheConfig", None] = False,
+        cache: Union[bool, "CacheConfig", None] = None,
         cache_ttl: int = 300,
         on_error: Optional[HookFn] = None,
         on_rate_limit: Optional[HookFn] = None,
@@ -196,10 +196,11 @@ class Apikit:
         on_page: Optional[HookFn] = None,
     ) -> "Apikit":
         """Create from a fully-populated ApiConfig object."""
+        resolved_cache = cache if cache is not None else config.cache
         return cls(
             base_url=config.base_url,
             config=config,
-            cache=cache,
+            cache=resolved_cache,
             cache_ttl=cache_ttl,
             on_error=on_error,
             on_rate_limit=on_rate_limit,
@@ -238,13 +239,20 @@ class Apikit:
         strategy: Optional[PaginationStrategy] = None,
         page_size: Optional[int] = None,
         data_path: Optional[str] = None,
+        limit_param: Optional[str] = None,
+        offset_param: Optional[str] = None,
+        page_param: Optional[str] = None,
+        cursor_param: Optional[str] = None,
+        next_cursor_path: Optional[str] = None,
+        has_more_path: Optional[str] = None,
+        total_pages_path: Optional[str] = None,
+        max_pages: Optional[int] = None,
     ) -> PaginatorBase:
         if not paginate:
+            cfg = self._config.pagination.model_copy()
             if data_path:
-                cfg = self._config.pagination.model_copy()
                 cfg.data_path = data_path
-                return NoPaginator(cfg)
-            return NoPaginator(self._config.pagination)
+            return NoPaginator(cfg)
         cfg = self._config.pagination.model_copy()
         if strategy:
             cfg.strategy = strategy
@@ -252,6 +260,22 @@ class Apikit:
             cfg.page_size = page_size
         if data_path:
             cfg.data_path = data_path
+        if limit_param:
+            cfg.limit_param = limit_param
+        if offset_param:
+            cfg.offset_param = offset_param
+        if page_param:
+            cfg.page_param = page_param
+        if cursor_param:
+            cfg.cursor_param = cursor_param
+        if next_cursor_path:
+            cfg.next_cursor_path = next_cursor_path
+        if has_more_path:
+            cfg.has_more_path = has_more_path
+        if total_pages_path:
+            cfg.total_pages_path = total_pages_path
+        if max_pages:
+            cfg.max_pages = max_pages
         return build_paginator(cfg)
 
     @staticmethod
@@ -278,17 +302,24 @@ class Apikit:
         strategy: Optional[PaginationStrategy] = None,
         page_size: Optional[int] = None,
         data_path: Optional[str] = None,
+        # ── Per-call pagination overrides ─────────────────────────────────────
+        limit_param: Optional[str] = None,
+        offset_param: Optional[str] = None,
+        page_param: Optional[str] = None,
+        cursor_param: Optional[str] = None,
+        next_cursor_path: Optional[str] = None,
+        has_more_path: Optional[str] = None,
+        total_pages_path: Optional[str] = None,
+        max_pages: Optional[int] = None,
+        # ── rest of existing params unchanged ─────────────────────────────────
         show_progress: bool = True,
         dry_run: bool = False,
-        # ── Feature 2: Cache ──────────────────────────────────────────────────
         cache: Optional[bool] = None,
-        # ── Feature 6: Field selection ────────────────────────────────────────
         flatten: bool = False,
         select: Optional[list[str]] = None,
         exclude: Optional[list[str]] = None,
         rename: Optional[dict[str, str]] = None,
         transform_fn: Optional[Callable[[dict], dict]] = None,
-        # ── Feature 8: Validation ─────────────────────────────────────────────
         model: Optional[type] = None,
         on_invalid: Literal["collect", "skip", "raise"] = "collect",
         strict: bool = False,
@@ -349,7 +380,16 @@ class Apikit:
 
         # ── Fetch ─────────────────────────────────────────────────────────────
         paginator = self._make_paginator(
-            paginate, strategy, page_size, data_path)
+            paginate, strategy, page_size, data_path,
+            limit_param=limit_param,
+            offset_param=offset_param,
+            page_param=page_param,
+            cursor_param=cursor_param,
+            next_cursor_path=next_cursor_path,
+            has_more_path=has_more_path,
+            total_pages_path=total_pages_path,
+            max_pages=max_pages,
+        )
         cumulative = 0
         page_num = 0
 
@@ -405,11 +445,25 @@ class Apikit:
             else:
                 import time as _time
                 t0 = _time.monotonic()
-                records = self._http.get_all_pages_sync(
-                    endpoint, params=params, paginator=paginator,
-                    progress=progress if show_progress else None,
-                    task_id=task if show_progress else None,
-                )
+                try:
+                    records = self._http.get_all_pages_sync(
+                        endpoint, params=params, paginator=paginator,
+                        progress=progress if show_progress else None,
+                        task_id=task if show_progress else None,
+                    )
+                except Exception as exc:
+                    self.hooks.fire("on_error", HookContext(
+                        event="on_error",
+                        url=f"{self._config.base_url}{endpoint}",
+                        method="GET",
+                        status_code=getattr(
+                            getattr(exc, "response", None), "status_code", 0),
+                        latency_ms=(_time.monotonic() - t0) * 1000,
+                        error_type=type(exc).__name__,
+                        error_message=str(exc),
+                        error=exc,
+                    ))
+                    raise
                 latency = (_time.monotonic() - t0) * 1000
                 self.hooks.fire("on_response", HookContext(
                     event="on_response",

@@ -23,7 +23,7 @@ For GitHub examples, set:
 
 import asyncio
 import os
-from ikiapikit import Apikit, AuthConfig, ApiConfig, GraphQLError
+from ikiapikit import Apikit, GraphQLError
 
 COUNTRIES_URL = "https://countries.trevorblades.com/"
 
@@ -56,7 +56,7 @@ print("\n▶ Query with variables")
 result = client.graphql(
     "/",
     """
-    query GetCountriesInContinent($code: String!) {
+    query GetCountriesInContinent($code: ID!) {
         continent(code: $code) {
             name
             countries {
@@ -85,7 +85,7 @@ print("\n▶ Query for Philippines (PH)")
 result = client.graphql(
     "/",
     """
-    query GetCountry($code: String!) {
+    query GetCountry($code: ID!) {
         country(code: $code) {
             name
             capital

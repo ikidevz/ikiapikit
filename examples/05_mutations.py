@@ -13,13 +13,9 @@ Demonstrates:
   • Chaining create → update → delete
   • Batch create / batch update workflows
 
-Why PATCH matters:
-  PUT replaces the entire resource. PATCH sends only the fields that
-  changed. Most modern APIs prefer PATCH because it is safer and more
-  efficient than sending a complete replacement payload.
-
-Uses JSONPlaceholder's fake write endpoints (they echo back the request
-without actually persisting anything — perfect for demos).
+Uses dummyjson.com — simulates all write operations and returns
+realistic responses including isDeleted/deletedOn on DELETE.
+POST uses /resource/add convention (e.g. /posts/add, /users/add).
 
 Run:
     python 05_mutations.py
@@ -28,7 +24,7 @@ Run:
 from ikiapikit import Apikit
 
 client = Apikit(
-    base_url="https://jsonplaceholder.typicode.com",
+    base_url="https://dummyjson.com",
     auth="none",
 )
 
@@ -38,10 +34,10 @@ print("=" * 60)
 
 
 # ── 1. POST — create a new resource ──────────────────────────────────────────
-print("\n▶ POST /posts  — create a new post")
+print("\n▶ POST /posts/add  — create a new post")
 
 new_post = client.post(
-    "/posts",
+    "/posts/add",
     body={
         "title": "apikit is amazing",
         "body": "It handles auth, pagination, and retries automatically.",
@@ -49,9 +45,8 @@ new_post = client.post(
     },
 )
 
-print("  Status  : created")
-print(f"  ID      : {new_post.get('id')}")
-print(f"  Title   : {new_post.get('title')}")
+print(f"  ID    : {new_post.get('id')}")
+print(f"  Title : {new_post.get('title')}")
 
 
 # ── 2. PUT — replace an existing resource ────────────────────────────────────
@@ -60,7 +55,6 @@ print("\n▶ PUT /posts/1  — replace post 1")
 updated = client.put(
     "/posts/1",
     body={
-        "id": 1,
         "title": "Updated title via apikit",
         "body": "Full replacement of the resource.",
         "userId": 1,
@@ -68,10 +62,11 @@ updated = client.put(
 )
 
 print(f"  Updated title : {updated.get('title')}")
+print(f"  userId        : {updated.get('userId')}")
 
 
-# ── 3. PATCH — partial update ────────────────────────────────────────────────
-print("\n▶ PATCH /posts/1  — update only one field")
+# ── 3. PATCH — partial update ─────────────────────────────────────────────────
+print("\n▶ PATCH /posts/1  — update only the title")
 
 patched = client.patch(
     "/posts/1",
@@ -88,12 +83,11 @@ print(f"  userId    : {patched.get('userId')}  ← unchanged")
 print("\n▶ PUT vs PATCH — semantic difference")
 
 put_result = client.put(
-    "/posts/1",
+    "/posts/2",
     body={
-        "id": 1,
         "title": "Full replacement via PUT",
-        "body": "All fields must be included.",
-        "userId": 1,
+        "body": "All fields sent explicitly.",
+        "userId": 2,
     },
 )
 
@@ -101,14 +95,14 @@ print(f"  PUT   title  : {put_result.get('title')}")
 print(f"  PUT   userId : {put_result.get('userId')}")
 
 patch_result = client.patch(
-    "/posts/1",
+    "/posts/2",
     body={
         "title": "Partial update via PATCH",
     },
 )
 
 print(f"  PATCH title  : {patch_result.get('title')}")
-print(f"  PATCH userId : {patch_result.get('userId')}")
+print(f"  PATCH userId : {patch_result.get('userId')}  ← untouched by PATCH")
 
 
 # ── 5. DELETE — remove a resource ────────────────────────────────────────────
@@ -116,37 +110,39 @@ print("\n▶ DELETE /posts/1  — delete post 1")
 
 result = client.delete("/posts/1")
 
-print(f"  Response : {result}")
+print(f"  isDeleted : {result.get('isDeleted')}")
+print(f"  deletedOn : {result.get('deletedOn')}")
+print(f"  title     : {result.get('title')}")
 
 
-# ── 6. POST with query params ────────────────────────────────────────────────
+# ── 6. POST with query params ─────────────────────────────────────────────────
 print("\n▶ POST with query params (body + params together)")
 
 result = client.post(
-    "/posts",
+    "/posts/add",
     body={
         "title": "test post",
         "userId": 2,
     },
     params={
-        "dry_run": "true",
+        "delay": "0",
     },
 )
 
 print(f"  Returned ID : {result.get('id')}")
+print(f"  Title       : {result.get('title')}")
 
 
-# ── 7. PATCH with query params ───────────────────────────────────────────────
+# ── 7. PATCH with query params ────────────────────────────────────────────────
 print("\n▶ PATCH with query params (body + params together)")
 
 result = client.patch(
-    "/posts/1",
+    "/posts/3",
     body={
-        "title": "Patched with dry_run flag",
+        "title": "Patched with extra query param",
     },
     params={
-        "notify": "false",
-        "audit": "true",
+        "delay": "0",
     },
 )
 
@@ -156,95 +152,84 @@ print(f"  Result : {result.get('title')}")
 # ── 8. Create → Update → Delete workflow ─────────────────────────────────────
 print("\n▶ Full workflow: Create → Update → Delete")
 
-contact = client.post(
-    "/users",
+post = client.post(
+    "/posts/add",
     body={
-        "name": "Alice Smith",
-        "email": "alice@example.com",
-        "phone": "555-0100",
+        "title": "Alice's first post",
+        "body": "Hello from apikit.",
+        "userId": 5,
     },
 )
 
-contact_id = contact.get("id", 11)
+# dummyjson echoes a fake id on POST (nothing is persisted),
+# so we use a known real id for the follow-up PUT and DELETE.
+real_id = 10
 
-print(
-    f"  Created  user id={contact_id} "
-    f"name={contact.get('name')}"
-)
+print(f"  Created : id={post.get('id')} title={post.get('title')}")
 
-updated_contact = client.put(
-    f"/users/{contact_id}",
+updated_post = client.put(
+    f"/posts/{real_id}",
     body={
-        "name": "Alice J. Smith",
-        "email": "alice.j@example.com",
-        "phone": "555-0100",
+        "title": "Alice's updated post",
+        "body": "Full replacement via PUT.",
+        "userId": 5,
     },
 )
+print(f"  Updated : title={updated_post.get('title')}")
 
+deleted = client.delete(f"/posts/{real_id}")
 print(
-    f"  Updated  name={updated_contact.get('name')}"
-)
-
-client.delete(f"/users/{contact_id}")
-
-print(f"  Deleted  user id={contact_id}")
+    f"  Deleted : id={deleted.get('id')} isDeleted={deleted.get('isDeleted')}")
 
 
-# ── 9. PATCH workflow — CRM-style update ─────────────────────────────────────
+# ── 9. PATCH workflow — partial field update ──────────────────────────────────
 print("\n▶ PATCH workflow — update one field without touching the rest")
 
-contact = client.post(
-    "/users",
+post = client.post(
+    "/posts/add",
     body={
-        "name": "Maria Santos",
-        "email": "maria@example.com",
-        "phone": "09171234567",
-        "company": "Acme PH",
+        "title": "Maria's original title",
+        "body": "Original body content.",
+        "userId": 8,
     },
 )
 
-contact_id = contact.get("id", 11)
+print(f"  Created : id={post.get('id')} title={post.get('title')}")
 
-print(
-    f"  Created : id={contact_id} "
-    f"name={contact.get('name')}"
-)
-
-updated = client.patch(
-    f"/users/{contact_id}",
+patched = client.patch(
+    "/posts/20",
     body={
-        "email": "maria.santos@newdomain.com",
+        "title": "Maria's patched title",
     },
 )
 
-print(f"  Patched : email={updated.get('email')}")
-print("  Intact  : phone and company remain unchanged")
+print(f"  Patched : title={patched.get('title')}")
+print(f"  Intact  : body={patched.get('body')[:40]}...")
 
 
-# ── 10. Batch create ─────────────────────────────────────────────────────────
+# ── 10. Batch create ──────────────────────────────────────────────────────────
 print("\n▶ Batch create — 5 posts in a loop")
 
 created_ids = []
 
 for i in range(1, 6):
     response = client.post(
-        "/posts",
+        "/posts/add",
         body={
-            "title": f"Post #{i}",
+            "title": f"Batch post #{i}",
+            "body": f"This is batch post number {i}.",
             "userId": i,
         },
     )
-
     created_ids.append(response.get("id"))
 
-print(f"  Created IDs: {created_ids}")
+print(f"  Created IDs : {created_ids}")
 
 
-# ── 11. Batch PATCH ──────────────────────────────────────────────────────────
+# ── 11. Batch PATCH ───────────────────────────────────────────────────────────
 print("\n▶ Batch PATCH — mark 5 todos as completed")
 
 todo_ids = [1, 2, 3, 4, 5]
-
 results = []
 
 for todo_id in todo_ids:
@@ -254,18 +239,21 @@ for todo_id in todo_ids:
             "completed": True,
         },
     )
-
     results.append(response)
 
-completed_count = sum(
-    1
-    for item in results
-    if item.get("completed")
-)
+completed_count = sum(1 for item in results if item.get("completed"))
 
-print(
-    f"  Patched {len(results)} todos "
-    f"— {completed_count} now completed"
-)
+print(f"  Patched {len(results)} todos — {completed_count} now completed")
+
+
+# ── 12. DELETE and inspect response ──────────────────────────────────────────
+print("\n▶ DELETE with rich response — dummyjson returns the deleted resource")
+
+deleted = client.delete("/products/1")
+
+print(f"  id        : {deleted.get('id')}")
+print(f"  title     : {deleted.get('title')}")
+print(f"  isDeleted : {deleted.get('isDeleted')}")
+print(f"  deletedOn : {deleted.get('deletedOn')}")
 
 print("\n✓ Mutations complete.\n")

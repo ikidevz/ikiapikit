@@ -66,10 +66,12 @@ class PaginationConfig(BaseModel):
 
     # Page-number pagination
     page_param: str = "page"
+    total_pages_path: Optional[str] = None
 
     # Cursor pagination
     cursor_param: str = "cursor"
     next_cursor_path: str = "next_cursor"
+    has_more_path: Optional[str] = None
 
     # GraphQL cursor
     graphql_after_var: str = "after"
@@ -78,25 +80,6 @@ class PaginationConfig(BaseModel):
     # Where the actual records live in the response (dot-path)
     data_path: Optional[str] = None
     total_path: Optional[str] = None
-
-
-class ApiConfig(BaseModel):
-    """Top-level API configuration — the single source of truth."""
-
-    name: Optional[str] = None
-    base_url: str
-    auth: AuthConfig = Field(default_factory=AuthConfig)
-    retry: RetryConfig = Field(default_factory=RetryConfig)
-    pagination: PaginationConfig = Field(default_factory=PaginationConfig)
-    headers: Dict[str, str] = Field(default_factory=dict)
-    timeout: float = DEFAULT_TIMEOUT
-    verify_ssl: bool = True
-    follow_redirects: bool = True
-
-    @field_validator("base_url")
-    @classmethod
-    def _strip_trailing_slash(cls, v: str) -> str:
-        return v.rstrip("/")
 
 
 class CacheConfig(BaseModel):
@@ -108,3 +91,23 @@ class CacheConfig(BaseModel):
     backend: Literal["memory", "disk"] = "memory"
     disk_path: Optional[str] = None
     honour_cache_control: bool = True
+
+
+class ApiConfig(BaseModel):
+    """Top-level API configuration — the single source of truth."""
+
+    name: Optional[str] = None
+    base_url: str
+    auth: AuthConfig = Field(default_factory=AuthConfig)
+    retry: RetryConfig = Field(default_factory=RetryConfig)
+    pagination: PaginationConfig = Field(default_factory=PaginationConfig)
+    cache: CacheConfig = Field(default_factory=CacheConfig)
+    headers: Dict[str, str] = Field(default_factory=dict)
+    timeout: float = DEFAULT_TIMEOUT
+    verify_ssl: bool = True
+    follow_redirects: bool = True
+
+    @field_validator("base_url")
+    @classmethod
+    def _strip_trailing_slash(cls, v: str) -> str:
+        return v.rstrip("/")
