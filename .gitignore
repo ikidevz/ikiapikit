@@ -4,5 +4,6 @@ bin/
 structure.py
 ARTICLE.MD
 .pytest_cache/
-examples/data/
-examples/output/
+pyproject.toml
+.pypirc
+dist/

@@ -25,7 +25,7 @@ Run:
 """
 
 import time
-from ikiapikit import Apikit, ApiConfig, AuthConfig, CacheConfig, PaginationConfig
+from ikiapikit import Apikit, ApiConfig, AuthConfig, CacheConfig
 
 print("=" * 60)
 print("15 · RESPONSE CACHING")

@@ -32,7 +32,6 @@ from pathlib import Path
 from ikiapikit import (
     Apikit,
     ApiConfig,
-    AuthConfig,
     PaginationConfig,
     ConnectorRegistry,
     ConnectorDefinition,

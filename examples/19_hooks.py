@@ -29,11 +29,9 @@ Run:
 from ikiapikit import HookChain
 import logging
 import time
-from dataclasses import dataclass, field
-from typing import Callable, Optional
 from ikiapikit import (
     Apikit, ApiConfig, AuthConfig, PaginationConfig,
-    HookContext, SlackHook, LogHook,
+    HookContext, LogHook,
 )
 
 print("=" * 60)
